@@ -7,6 +7,8 @@ This is just another killring style vim plugin similar to [nvim-miniyank](https:
 
 Note: Requires either Neovim or Vim 8+
 
+Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/pull/66) to vim-repeat to be merged to work properly
+
 ## Example Config
 
 Note that there are no default mappings.  Yoink will automatically record all yanks into a history by observing the `TextYankPost` autocommand added in Neovim and Vim 8+.  But you will need to define some mappings to navigate this history.  For example:
