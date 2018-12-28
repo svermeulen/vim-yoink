@@ -137,7 +137,10 @@ function! yoink#tryAddToHistory(entry)
             call remove(s:history, g:yoinkMaxItems, -1)
         endif
         call yoink#onHistoryChanged()
+        return 1
     endif
+
+    return 0
 endfunction
 
 function! yoink#rotate(offset)
@@ -249,6 +252,14 @@ function! yoink#onFocusGained()
             call yoink#tryAddToHistory(currentInfo)
         endif
     endif
+endfunction
+
+" Call this to simulate a yank from the user
+function! yoink#manualYank(text, ...) abort
+    let regType = a:0 ? a:1 : 'v'
+    let entry = { 'text': a:text, 'type': regType }
+    call yoink#tryAddToHistory(entry)
+    call yoink#setDefaultReg(entry)
 endfunction
 
 function! yoink#onYank(ev) abort

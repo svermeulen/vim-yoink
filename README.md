@@ -45,3 +45,7 @@ You can optionally override the default behaviour with the following settings:
 
 Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by observing the `FocusGained` autocommand and then checking if the system clipboard was changed and if so adding it to the history.
 
+## Other Notes
+
+* If you want to add to the yank history from your own vimscript code, you can do this by calling `yoink#manualYank`
+
