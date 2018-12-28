@@ -64,12 +64,15 @@ function! yoink#postPasteSwap(offset)
         let s:offsetSum = 0
     endif
 
-    if s:offsetSum + a:offset < 0
+    let count = v:count > 0 ? v:count : 1
+    let offset = a:offset * count
+
+    if s:offsetSum + offset < 0
         echo 'Reached most recent item'
         return
     endif
 
-    if s:offsetSum + a:offset == len(s:history)
+    if s:offsetSum + offset >= len(s:history)
         echo 'Reached oldest item'
         return
     endif
@@ -79,8 +82,8 @@ function! yoink#postPasteSwap(offset)
         autocmd!
     augroup END
 
-    call yoink#rotate(a:offset)
-    let s:offsetSum += a:offset
+    call yoink#rotate(offset)
+    let s:offsetSum += offset
     exec "normal \<Plug>(RepeatUndo)\<Plug>(RepeatDot)"
 
     let s:lastSwapChangedtick = b:changedtick
@@ -215,7 +218,9 @@ function! yoink#showYank(yank, index)
 endfunction
 
 function! yoink#rotateThenPrint(offset)
-    call yoink#rotate(a:offset)
+    let count = v:count > 0 ? v:count : 1
+    let offset = a:offset * count
+    call yoink#rotate(offset)
 
     let lines = split(yoink#getCurrentYankInfo().text, '\n')
 

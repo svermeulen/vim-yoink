@@ -45,11 +45,12 @@ augroup _Yoink
     autocmd FocusGained * call yoink#onFocusGained()
 augroup END
 
-nnoremap <silent> <plug>(YoinkRotateForward) :call yoink#rotateThenPrint(-1)<cr>
-nnoremap <silent> <plug>(YoinkRotateBack) :call yoink#rotateThenPrint(1)<cr>
+" <c-u> because count is handled internally to each of these
+nnoremap <silent> <plug>(YoinkRotateForward) :<c-u>call yoink#rotateThenPrint(-1)<cr>
+nnoremap <silent> <plug>(YoinkRotateBack) :<c-u>call yoink#rotateThenPrint(1)<cr>
 
-nnoremap <silent> <plug>(YoinkPostPasteSwapForward) :call yoink#postPasteSwap(-1)<cr>
-nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :call yoink#postPasteSwap(1)<cr>
+nnoremap <silent> <plug>(YoinkPostPasteSwapForward) :<c-u>call yoink#postPasteSwap(-1)<cr>
+nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :<c-u>call yoink#postPasteSwap(1)<cr>
 
 nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>call yoink#paste('p')<cr>
 nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>call yoink#paste('P')<cr>
