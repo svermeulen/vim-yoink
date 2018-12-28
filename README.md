@@ -39,9 +39,9 @@ You can optionally override the default behaviour with the following settings:
 
 `g:yoinkMaxItems` - History size. Default: `20`
 
-`g:yoinkIncludeDeleteOperations` - When true, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
+`g:yoinkIncludeDeleteOperations` - When set to `1`, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
 
-`g:yoinkSyncSystemClipboardOnFocus` - When false, the System Clipboard feature described below will be disabled
+`g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
 
 ## System Clipboard
 
