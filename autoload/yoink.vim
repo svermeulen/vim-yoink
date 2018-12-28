@@ -194,7 +194,8 @@ function! yoink#onFocusGained()
     " If we are using the system register as the default register
     " and the user leaves vim, copies something, then returns,
     " we want to add this data to the yank history
-    if yoink#getDefaultReg() ==# '*'
+    let defaultReg = yoink#getDefaultReg()
+    if defaultReg ==# '*' || defaultReg == '+'
         let currentInfo = yoink#getCurrentYankInfo()
 
         if len(s:history) == 0 || s:history[0] != currentInfo
