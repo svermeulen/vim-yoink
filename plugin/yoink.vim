@@ -9,12 +9,33 @@ if !has("nvim")
    finish
 endif
 
+try
+    call repeat#invalidate()
+catch /\VUnknown function/
+    echoerr 'Could not find vim-repeat installed.  yoink.vim requires vim-repeat to function properly.  Please install vim-repeat and restart Vim'
+    finish
+catch
+    " Sometimes error occurs due to clearing augroup that doesn't exist
+    " So just ignore this case
+    " Be nice if there was a less hacky way to do this but I can't think of one
+    " Checking runtimepath for vim-repeat doesn't work since not everyone uses it that way
+    " and some plugin managers actually merge everything together
+endtry
+
 if !has_key(g:, "yoinkMaxItems")
     let g:yoinkMaxItems = 20
 endif
 
 if !has_key(g:, "yoinkShowYanksWidth")
     let g:yoinkShowYanksWidth = 80
+endif
+
+if !has_key(g:, "yoinkIncludeDeleteOperations")
+    let g:yoinkIncludeDeleteOperations = 0
+endif
+
+if !has_key(g:, "yoinkSyncSystemClipboardOnFocus")
+    let g:yoinkSyncSystemClipboardOnFocus = 1
 endif
 
 augroup _Yoink

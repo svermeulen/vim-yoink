@@ -210,6 +210,10 @@ function! yoink#rotateThenPrint(offset)
 endfunction
 
 function! yoink#onFocusGained()
+    if !g:yoinkSyncSystemClipboardOnFocus
+        return
+    endif
+
     " If we are using the system register as the default register
     " and the user leaves vim, copies something, then returns,
     " we want to add this data to the yank history
@@ -225,11 +229,11 @@ function! yoink#onFocusGained()
 endfunction
 
 function! yoink#onYank(ev) abort
-    if len(a:ev.regcontents) == 1 && len(a:ev.regcontents[0]) <= 1
+    if a:ev.regname != '' && a:ev.regname == yoink#getDefaultReg()
         return
-    end
+    endif
 
-    if a:ev.operator == 'y' && (a:ev.regname == '' || a:ev.regname == yoink#getDefaultReg())
+    if a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations
         call yoink#tryAddToHistory({ 'text': join(a:ev.regcontents, '\n'), 'type': a:ev.regtype })
     end
 endfunction

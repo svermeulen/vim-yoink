@@ -33,6 +33,14 @@ We also need to override the `p` and `P` keys to notify Yoink that a paste has o
 
 You can also view the current history by executing the command `:Yanks`.  And you can clear the history by executing `:ClearYanks`
 
+## Settings
+
+You can optionally override the default behaviour with the following settings:
+
+`g:yoinkMaxItems` - History size. Default: `20`
+`g:yoinkIncludeDeleteOperations` - When true, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
+`g:yoinkSyncSystemClipboardOnFocus` - When false, the System Clipboard feature described below will be disabled
+
 ## System Clipboard
 
 Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by observing the `FocusGained` autocommand and then checking if the system clipboard was changed and if so adding it to the history.
