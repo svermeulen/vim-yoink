@@ -18,6 +18,13 @@ function! yoink#getDefaultReg()
     endif
 endfunction
 
+function! yoink#paste(pasteType)
+    let count = v:count > 0 ? v:count : 1
+    exec "normal! " . count . a:pasteType
+    call yoink#startPasteSwap()
+    silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", count)
+endfunction
+
 function! s:postSwapCursorMove2()
     if !s:isSwapping
         " Should never happen
@@ -88,10 +95,11 @@ function! yoink#postPasteSwap(offset)
 endfunction
 
 function! yoink#visualModePaste()
+    let count = v:count > 0 ? v:count : 1
     normal! gv"_d
 
     " We need to start the paste as a distinct operation here so that undo applies to it only
-    call feedkeys("\<plug>(YoinkPaste_P)", 'tm')
+    call feedkeys(count . "\<plug>(YoinkPaste_P)", 'tm')
 endfunction
 
 " Note that this gets executed for every swap in addition to the initial paste
