@@ -52,15 +52,25 @@ function! yoink#postPasteSwap(offset)
         return
     endif
 
-    if s:isSwapping
-        " Stop checking to end the swap session
-        augroup YoinkSwapPasteMoveDetect
-            autocmd!
-        augroup END
-    else
+    if !s:isSwapping
         let s:isSwapping = 1
         let s:offsetSum = 0
     endif
+
+    if s:offsetSum + a:offset < 0
+        echo 'Reached most recent item'
+        return
+    endif
+
+    if s:offsetSum + a:offset == len(s:history)
+        echo 'Reached oldest item'
+        return
+    endif
+
+    " Stop checking to end the swap session
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+    augroup END
 
     call yoink#rotate(a:offset)
     let s:offsetSum += a:offset
@@ -81,7 +91,7 @@ function! yoink#visualModePaste()
     normal! gv"_d
 
     " We need to start the paste as a distinct operation here so that undo applies to it only
-    call feedkeys("\<plug>(YoinkPaste_P)", 'm')
+    call feedkeys("\<plug>(YoinkPaste_P)", 'tm')
 endfunction
 
 " Note that this gets executed for every swap in addition to the initial paste
