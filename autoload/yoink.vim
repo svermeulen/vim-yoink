@@ -2,6 +2,7 @@
 scriptencoding utf-8
 
 let s:lastPasteChangedtick = -1
+let s:lastSwapChangedtick = -1
 let s:history = []
 let s:isSwapping = 0
 let s:offsetSum = 0
@@ -15,10 +16,6 @@ function! yoink#getDefaultReg()
     else
         return "\""
     endif
-endfunction
-
-function! yoink#wasLastChangePaste()
-    return b:changedtick == s:lastPasteChangedtick
 endfunction
 
 function! s:postSwapCursorMove2()
@@ -46,8 +43,12 @@ function! s:postSwapCursorMove1()
 endfunction
 
 function! yoink#postPasteSwap(offset)
-    if !yoink#wasLastChangePaste()
-        echo 'Last action was not paste, swap ignored'
+    " If a change occurred that was not a paste or a swap, we do not want to do the undo-redo
+    " Also, if the swap has ended by executing a cursor move, then we don't want to
+    " restart the swap again from the beginning because they would expect to still be at the
+    " previous offset
+    if b:changedtick != s:lastPasteChangedtick || (!s:isSwapping && b:changedtick == s:lastSwapChangedtick)
+        echo 'Last action was not paste - swap ignored'
         return
     endif
 
@@ -63,19 +64,28 @@ function! yoink#postPasteSwap(offset)
 
     call yoink#rotate(a:offset)
     let s:offsetSum += a:offset
-    exec 'normal! u.'
+    exec "normal \<Plug>(RepeatUndo)\<Plug>(RepeatDot)"
 
-    " When we undo-redo you might expect the changed tick to be unchanged but this is not
-    " the case for some reason, so we have to update it
-    let s:lastPasteChangedtick = b:changedtick
+    let s:lastSwapChangedtick = b:changedtick
 
+    " Wait until the cursor moves and then end the swap
+    " We do this so that if they move somewhere else and then paste they would expect the most
+    " recent yank and not the yank at the offset where they finished the previous swap
     augroup YoinkSwapPasteMoveDetect
         autocmd!
         autocmd CursorMoved <buffer> call <sid>postSwapCursorMove1()
     augroup END
 endfunction
 
-function! yoink#onPostPaste()
+function! yoink#visualModePaste()
+    normal! gv"_d
+
+    " We need to start the paste as a distinct operation here so that undo applies to it only
+    call feedkeys("\<plug>(YoinkPaste_P)", 'm')
+endfunction
+
+" Note that this gets executed for every swap in addition to the initial paste
+function! yoink#startPasteSwap()
     let s:lastPasteChangedtick = b:changedtick
 endfunction
 
@@ -111,6 +121,15 @@ endfunction
 
 function! yoink#rotate(offset)
     if empty(s:history) || a:offset == 0
+        return
+    endif
+
+    " If the default register has contents different than the first entry in our history,
+    " then it must have changed through a delete operation or directly via setreg etc.
+    " In this case, don't rotate and instead just update the default register
+    if s:history[0] != yoink#getCurrentYankInfo()
+        call yoink#setDefaultReg(s:history[0])
+        call yoink#onHistoryChanged()
         return
     endif
 
@@ -214,4 +233,9 @@ function! yoink#onYank(ev) abort
         call yoink#tryAddToHistory({ 'text': join(a:ev.regcontents, '\n'), 'type': a:ev.regtype })
     end
 endfunction
+
+" For when re-sourcing this file after a paste
+augroup YoinkSwapPasteMoveDetect
+    autocmd!
+augroup END
 

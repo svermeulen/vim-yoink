@@ -10,7 +10,7 @@ if !has("nvim")
 endif
 
 if !has_key(g:, "yoinkMaxItems")
-    let g:yoinkMaxItems = 10
+    let g:yoinkMaxItems = 20
 endif
 
 if !has_key(g:, "yoinkShowYanksWidth")
@@ -24,11 +24,16 @@ augroup _Yoink
     autocmd FocusGained * call yoink#onFocusGained()
 augroup END
 
-nnoremap <plug>(YoinkRotateForward) :call yoink#rotateThenPrint(-1)<cr>
-nnoremap <plug>(YoinkRotateBack) :call yoink#rotateThenPrint(1)<cr>
+nnoremap <silent> <plug>(YoinkRotateForward) :call yoink#rotateThenPrint(-1)<cr>
+nnoremap <silent> <plug>(YoinkRotateBack) :call yoink#rotateThenPrint(1)<cr>
 
-nnoremap <plug>(YoinkPostPasteSwapForward) :call yoink#postPasteSwap(-1)<cr>
-nnoremap <plug>(YoinkPostPasteSwapBack) :call yoink#postPasteSwap(1)<cr>
+nnoremap <silent> <plug>(YoinkPostPasteSwapForward) :call yoink#postPasteSwap(-1)<cr>
+nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :call yoink#postPasteSwap(1)<cr>
+
+nnoremap <silent> <plug>(YoinkPaste_p) p:call yoink#startPasteSwap()<cr>:silent! call repeat#set("\<plug>(YoinkPaste_p)")<cr>
+nnoremap <silent> <plug>(YoinkPaste_P) P:call yoink#startPasteSwap()<cr>:silent! call repeat#set("\<plug>(YoinkPaste_P)")<cr>
+
+xnoremap <silent> <plug>(YoinkPasteVisualMode) :call yoink#visualModePaste()<cr>
 
 command! -nargs=0 Yanks call yoink#showYanks()
 command! -nargs=0 ClearYanks call yoink#clearYanks()
