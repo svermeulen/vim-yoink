@@ -1,7 +1,10 @@
 
 scriptencoding utf-8
 
+let s:lastPasteChangedtick = -1
 let s:history = []
+let s:isSwapping = 0
+let s:offsetSum = 0
 
 function! yoink#getDefaultReg()
     let clipboardFlags = split(&clipboard, ',')
@@ -12,6 +15,68 @@ function! yoink#getDefaultReg()
     else
         return "\""
     endif
+endfunction
+
+function! yoink#wasLastChangePaste()
+    return b:changedtick == s:lastPasteChangedtick
+endfunction
+
+function! s:postSwapCursorMove2()
+    if !s:isSwapping
+        " Should never happen
+        throw 'Unknown Error detected during yoink paste'
+    endif
+
+    let s:isSwapping = 0
+
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+    augroup END
+
+    " Return yank positions to their original state before we started swapping
+    call yoink#rotate(-s:offsetSum)
+endfunction
+
+function! s:postSwapCursorMove1()
+    " Wait for the next cursor move because this gets called immediately after yoink#postPasteSwap
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove2()
+    augroup END
+endfunction
+
+function! yoink#postPasteSwap(offset)
+    if !yoink#wasLastChangePaste()
+        echo 'Last action was not paste, swap ignored'
+        return
+    endif
+
+    if s:isSwapping
+        " Stop checking to end the swap session
+        augroup YoinkSwapPasteMoveDetect
+            autocmd!
+        augroup END
+    else
+        let s:isSwapping = 1
+        let s:offsetSum = 0
+    endif
+
+    call yoink#rotate(a:offset)
+    let s:offsetSum += a:offset
+    exec 'normal! u.'
+
+    " When we undo-redo you might expect the changed tick to be unchanged but this is not
+    " the case for some reason, so we have to update it
+    let s:lastPasteChangedtick = b:changedtick
+
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove1()
+    augroup END
+endfunction
+
+function! yoink#onPostPaste()
+    let s:lastPasteChangedtick = b:changedtick
 endfunction
 
 function! yoink#setDefaultReg(entry)

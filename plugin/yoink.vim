@@ -27,6 +27,9 @@ augroup END
 nnoremap <plug>(YoinkRotateForward) :call yoink#rotateThenPrint(-1)<cr>
 nnoremap <plug>(YoinkRotateBack) :call yoink#rotateThenPrint(1)<cr>
 
+nnoremap <plug>(YoinkPostPasteSwapForward) :call yoink#postPasteSwap(-1)<cr>
+nnoremap <plug>(YoinkPostPasteSwapBack) :call yoink#postPasteSwap(1)<cr>
+
 command! -nargs=0 Yanks call yoink#showYanks()
 command! -nargs=0 ClearYanks call yoink#clearYanks()
 
