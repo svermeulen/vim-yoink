@@ -268,7 +268,10 @@ function! yoink#onYank(ev) abort
     endif
 
     if a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations
-        call yoink#tryAddToHistory({ 'text': join(a:ev.regcontents, '\n'), 'type': a:ev.regtype })
+        " Don't use a:ev.regcontents because it's a list of lines and not just the raw text 
+        " and the raw text is needed when comparing getCurrentYankInfo in a few places
+        " above
+        call yoink#tryAddToHistory({ 'text': getreg(a:ev.regname), 'type': a:ev.regtype })
     end
 endfunction
 
