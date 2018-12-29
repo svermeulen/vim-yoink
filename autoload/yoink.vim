@@ -1,7 +1,7 @@
 
 scriptencoding utf-8
 
-let s:lastPasteChangedtick = -1
+let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:history = []
 let s:isSwapping = 0
@@ -21,7 +21,7 @@ endfunction
 function! yoink#paste(pasteType)
     let count = v:count > 0 ? v:count : 1
     exec "normal! " . count . a:pasteType
-    call yoink#startPasteSwap()
+    call yoink#startUndoRepeatSwap()
     silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", count)
 endfunction
 
@@ -54,7 +54,7 @@ function! yoink#postPasteSwap(offset)
     " Also, if the swap has ended by executing a cursor move, then we don't want to
     " restart the swap again from the beginning because they would expect to still be at the
     " previous offset
-    if b:changedtick != s:lastPasteChangedtick || (!s:isSwapping && b:changedtick == s:lastSwapChangedtick)
+    if b:changedtick != s:lastSwapStartChangedtick || (!s:isSwapping && b:changedtick == s:lastSwapChangedtick)
         echo 'Last action was not paste - swap ignored'
         return
     endif
@@ -106,8 +106,8 @@ function! yoink#visualModePaste()
 endfunction
 
 " Note that this gets executed for every swap in addition to the initial paste
-function! yoink#startPasteSwap()
-    let s:lastPasteChangedtick = b:changedtick
+function! yoink#startUndoRepeatSwap()
+    let s:lastSwapStartChangedtick = b:changedtick
 endfunction
 
 function! yoink#setDefaultReg(entry)
