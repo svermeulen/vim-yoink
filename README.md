@@ -27,13 +27,6 @@ With these mappings, immediately after performing a paste, you can cycle through
 
 We also need to override the `p` and `P` keys to notify Yoink that a paste has occurred, so that swapping via the `<c-n>` and `<c-p>` keys can be enabled.
 
-If you want to be able to swap between yanks after pasting in visual mode you can do that too:
-
-```viml
-xmap p <plug>(YoinkPasteVisualMode)
-xmap P <plug>(YoinkPasteVisualMode)
-```
-
 Note that the swap operations above will only affect the current paste and the history order will be unchanged.  However - if you do want to permanently cycle through the history, you can do that too:
 
 ```viml
@@ -48,6 +41,8 @@ nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
 ```
 
 Now, hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards using `<c-=>` (however you can change this with a setting as described below)
+
+Note that yoink does not support swapping when doing paste in visual mode.  However, if you also install [vim-subversive](https://github.com/svermeulen/vim-subversive), that actually does contain a map you can use for that.
 
 ## Commands
 

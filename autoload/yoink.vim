@@ -124,14 +124,6 @@ function! yoink#postPasteSwap(offset)
     call yoink#performSwap()
 endfunction
 
-function! yoink#visualModePaste()
-    let count = v:count > 0 ? v:count : 1
-    normal! gv"_d
-
-    " We need to start the paste as a distinct operation here so that undo applies to it only
-    call feedkeys(count . "\<plug>(YoinkPaste_P)", 'tm')
-endfunction
-
 " Note that this gets executed for every swap in addition to the initial paste
 function! yoink#startUndoRepeatSwap()
     let s:lastSwapStartChangedtick = b:changedtick
