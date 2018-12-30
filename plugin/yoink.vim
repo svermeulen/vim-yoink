@@ -53,6 +53,10 @@ if !has_key(g:, "yoinkAutoFormatPaste")
     let g:yoinkAutoFormatPaste = 0
 endif
 
+if !has_key(g:, "yoinkMoveCursorToEndOfPaste")
+    let g:yoinkMoveCursorToEndOfPaste = 0
+endif
+
 augroup _Yoink
     au!
     autocmd TextYankPost * call yoink#onYank(copy(v:event))

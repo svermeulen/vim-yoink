@@ -25,6 +25,9 @@ function! yoink#paste(pasteType, reg)
     if s:autoFormat
         normal! `[=`]
     endif
+    if g:yoinkMoveCursorToEndOfPaste
+        exec "keepjumps normal! `]"
+    endif
     call yoink#startUndoRepeatSwap()
     silent! call repeat#setreg(fullPlugName, a:reg)
     silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", cnt)
