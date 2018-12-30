@@ -5,8 +5,19 @@ endif
 let g:yoinkInitialized = 1
 
 if !has("nvim")
-   echoerr "yoink requires neovim"
-   finish
+    try
+        augroup _YoinkCompatibleCheck
+            au!
+            autocmd TextYankPost * let g:yoinkInitialized = 1
+        augroup END
+    catch
+        echoerr "Yoink requires neovim or a version of Vim that supports the TextYankPost autocommand (Vim 8+)"
+        finish
+    endtry
+
+    augroup _YoinkCompatibleCheck
+        au!
+    augroup END
 endif
 
 try
