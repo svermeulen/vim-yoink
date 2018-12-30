@@ -1,6 +1,7 @@
 
 scriptencoding utf-8
 
+let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
 let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:history = []
@@ -21,6 +22,9 @@ endfunction
 function! yoink#paste(pasteType, reg)
     let count = v:count > 0 ? v:count : 1
     exec "normal! \"" . a:reg . count . a:pasteType
+    if s:autoFormat
+        normal! `[=`]
+    endif
     call yoink#startUndoRepeatSwap()
     silent! call repeat#setreg(fullPlugName, a:reg)
     silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", count)
@@ -33,6 +37,7 @@ function! s:postSwapCursorMove2()
     endif
 
     let s:isSwapping = 0
+    let s:autoFormat = g:yoinkAutoFormatPaste
 
     augroup YoinkSwapPasteMoveDetect
         autocmd!
@@ -50,19 +55,54 @@ function! s:postSwapCursorMove1()
     augroup END
 endfunction
 
-function! yoink#postPasteSwap(offset)
+function! yoink#postPasteToggleFormat()
+    if yoink#tryStartSwap()
+        let s:autoFormat = !s:autoFormat
+        call yoink#performSwap()
+    endif
+endfunction
+
+function! yoink#tryStartSwap()
     " If a change occurred that was not a paste or a swap, we do not want to do the undo-redo
     " Also, if the swap has ended by executing a cursor move, then we don't want to
     " restart the swap again from the beginning because they would expect to still be at the
     " previous offset
     if b:changedtick != s:lastSwapStartChangedtick || (!s:isSwapping && b:changedtick == s:lastSwapChangedtick)
         echo 'Last action was not paste - swap ignored'
-        return
+        return 0
     endif
 
     if !s:isSwapping
         let s:isSwapping = 1
         let s:offsetSum = 0
+    endif
+
+    return 1
+endfunction
+
+function! yoink#performSwap()
+    " Stop checking to end the swap session
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+    augroup END
+
+    exec "normal \<Plug>(RepeatUndo)\<Plug>(RepeatDot)"
+
+    let s:lastSwapChangedtick = b:changedtick
+
+    " Wait until the cursor moves and then end the swap
+    " We do this so that if they move somewhere else and then paste they would expect the most
+    " recent yank and not the yank at the offset where they finished the previous swap
+    augroup YoinkSwapPasteMoveDetect
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove1()
+    augroup END
+endfunction
+
+function! yoink#postPasteSwap(offset)
+
+    if !yoink#tryStartSwap()
+        return
     endif
 
     let count = v:count > 0 ? v:count : 1
@@ -78,24 +118,10 @@ function! yoink#postPasteSwap(offset)
         return
     endif
 
-    " Stop checking to end the swap session
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-    augroup END
-
     call yoink#rotate(offset)
     let s:offsetSum += offset
-    exec "normal \<Plug>(RepeatUndo)\<Plug>(RepeatDot)"
 
-    let s:lastSwapChangedtick = b:changedtick
-
-    " Wait until the cursor moves and then end the swap
-    " We do this so that if they move somewhere else and then paste they would expect the most
-    " recent yank and not the yank at the offset where they finished the previous swap
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove1()
-    augroup END
+    call yoink#performSwap()
 endfunction
 
 function! yoink#visualModePaste()

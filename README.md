@@ -11,25 +11,43 @@ Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/p
 
 ## Example Config
 
-Note that there are no default mappings.  Yoink will automatically record all yanks into a history by observing the `TextYankPost` autocommand added in Neovim and Vim 8+.  But you will need to define some mappings to navigate this history.  For example:
+Note that there are no default mappings.  Yoink will automatically record all yanks into a history by observing the `TextYankPost` autocommand added in Neovim and Vim 8+.  But you will need to define some mappings to navigate this history.  
+
+You will at least want to define maps for paste and swap paste:
 
 ```viml
-nmap [y <plug>(YoinkRotateBack)
-nmap ]y <plug>(YoinkRotateForward)
-
 nmap <c-n> <plug>(YoinkPostPasteSwapBack)
 nmap <c-p> <plug>(YoinkPostPasteSwapForward)
 
 nmap p <plug>(YoinkPaste_p)
 nmap P <plug>(YoinkPaste_P)
+```
 
+With these mappings, immediately after performing a paste, you can cycle through the history by hitting `<c-n>` and `<c-p>`
+
+We also need to override the `p` and `P` keys to notify Yoink that a paste has occurred, so that swapping via the `<c-n>` and `<c-p>` keys can be enabled.
+
+If you want to be able to swap between yanks after pasting in visual mode you can do that too:
+
+```viml
 xmap p <plug>(YoinkPasteVisualMode)
 xmap P <plug>(YoinkPasteVisualMode)
 ```
 
-With these mappings, immediately after performing a paste, you can cycle through the history by hitting `<c-n>` and `<c-p>`.  Note that this will only affect the current paste and the history order will be unchanged.  However - if you do want to permanently cycle through the history, you can do this using the `[y` and `]y` keys.
+Note that the swap operations above will only affect the current paste and the history order will be unchanged.  However - if you do want to permanently cycle through the history, you can do that too:
 
-We also need to override the `p` and `P` keys to notify Yoink that a paste has occurred, so that swapping via the `<c-n>` and `<c-p>` keys can be enabled.
+```viml
+nmap [y <plug>(YoinkRotateBack)
+nmap ]y <plug>(YoinkRotateForward)
+```
+
+You might also want to add a map for toggling whether the current paste is formatted or not:
+
+```viml
+nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
+```
+
+Note that with these mappings you can use both `<c-=>` and `<c-n>`/`<c-p>` at the same time.  Hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards (however you can change this with a setting as described below)
 
 You can also view the current history by executing the command `:Yanks`.  And you can clear the history by executing `:ClearYanks`
 
@@ -42,6 +60,8 @@ You can optionally override the default behaviour with the following settings:
 `g:yoinkIncludeDeleteOperations` - When set to `1`, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
 
 `g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
+
+`g:yoinkAutoFormatPaste` - When set to `1`, after a paste occurs it will automatically be formatted (using `=` key).  Default: `0`.  Note that you can leave this off and just use the toggle key instead for cases where you want to format after the paste.
 
 ## System Clipboard
 

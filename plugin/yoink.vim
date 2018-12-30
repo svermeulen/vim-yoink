@@ -38,6 +38,10 @@ if !has_key(g:, "yoinkSyncSystemClipboardOnFocus")
     let g:yoinkSyncSystemClipboardOnFocus = 1
 endif
 
+if !has_key(g:, "yoinkAutoFormatPaste")
+    let g:yoinkAutoFormatPaste = 0
+endif
+
 augroup _Yoink
     au!
     autocmd TextYankPost * call yoink#onYank(copy(v:event))
@@ -54,6 +58,8 @@ nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :<c-u>call yoink#postPasteSwap(
 
 nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>call yoink#paste('p', v:register)<cr>
 nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>call yoink#paste('P', v:register)<cr>
+
+nnoremap <silent> <plug>(YoinkPostPasteToggleFormat) :<c-u>call yoink#postPasteToggleFormat()<cr>
 
 xnoremap <silent> <plug>(YoinkPasteVisualMode) :call yoink#visualModePaste()<cr>
 
