@@ -20,14 +20,14 @@ function! yoink#getDefaultReg()
 endfunction
 
 function! yoink#paste(pasteType, reg)
-    let count = v:count > 0 ? v:count : 1
-    exec "normal! \"" . a:reg . count . a:pasteType
+    let cnt = v:count > 0 ? v:count : 1
+    exec "normal! \"" . a:reg . cnt . a:pasteType
     if s:autoFormat
         normal! `[=`]
     endif
     call yoink#startUndoRepeatSwap()
     silent! call repeat#setreg(fullPlugName, a:reg)
-    silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", count)
+    silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", cnt)
 endfunction
 
 function! s:postSwapCursorMove2()
@@ -105,8 +105,8 @@ function! yoink#postPasteSwap(offset)
         return
     endif
 
-    let count = v:count > 0 ? v:count : 1
-    let offset = a:offset * count
+    let cnt = v:count > 0 ? v:count : 1
+    let offset = a:offset * cnt
 
     if s:offsetSum + offset < 0
         echo 'Reached most recent item'
@@ -127,10 +127,6 @@ endfunction
 " Note that this gets executed for every swap in addition to the initial paste
 function! yoink#startUndoRepeatSwap()
     let s:lastSwapStartChangedtick = b:changedtick
-endfunction
-
-function! yoink#setDefaultReg(entry)
-    call setreg(yoink#getDefaultReg(), a:entry.text, a:entry.type)
 endfunction
 
 function! yoink#onHistoryChanged()
@@ -170,8 +166,8 @@ function! yoink#rotate(offset)
     " If the default register has contents different than the first entry in our history,
     " then it must have changed through a delete operation or directly via setreg etc.
     " In this case, don't rotate and instead just update the default register
-    if s:history[0] != yoink#getCurrentYankInfo()
-        call yoink#setDefaultReg(s:history[0])
+    if s:history[0] != yoink#getDefaultYankInfo()
+        call yoink#setDefaultYankInfo(s:history[0])
         call yoink#onHistoryChanged()
         return
     endif
@@ -190,12 +186,12 @@ function! yoink#rotate(offset)
         endif
     endwhile
 
-    call yoink#setDefaultReg(s:history[0])
+    call yoink#setDefaultYankInfo(s:history[0])
     call yoink#onHistoryChanged()
 endfunction
 
 function! yoink#addCurrentToHistory()
-    call yoink#tryAddToHistory(yoink#getCurrentYankInfo())
+    call yoink#tryAddToHistory(yoink#getDefaultYankInfo())
 endfunction
 
 function! yoink#clearYanks()
@@ -205,8 +201,20 @@ function! yoink#clearYanks()
     echo "Cleared yank history of " . l:size . " entries"
 endfunction
 
-function! yoink#getCurrentYankInfo()
+function! yoink#getDefaultYankText()
+    return yoink#getDefaultYankInfo().text
+endfunction
+
+function! yoink#getDefaultYankInfo()
     return yoink#getYankInfoForReg(yoink#getDefaultReg())
+endfunction
+
+function! yoink#setDefaultYankText(text)
+    call setreg(yoink#getDefaultReg(), a:text, 'v')
+endfunction
+
+function! yoink#setDefaultYankInfo(entry)
+    call setreg(yoink#getDefaultReg(), a:entry.text, a:entry.type)
 endfunction
 
 function! yoink#getYankInfoForReg(reg)
@@ -240,11 +248,11 @@ function! yoink#showYank(yank, index)
 endfunction
 
 function! yoink#rotateThenPrint(offset)
-    let count = v:count > 0 ? v:count : 1
-    let offset = a:offset * count
+    let cnt = v:count > 0 ? v:count : 1
+    let offset = a:offset * cnt
     call yoink#rotate(offset)
 
-    let lines = split(yoink#getCurrentYankInfo().text, '\n')
+    let lines = split(yoink#getDefaultYankText(), '\n')
 
     if empty(lines)
         " This happens when it only contains newlines
@@ -264,7 +272,7 @@ function! yoink#onFocusGained()
     " we want to add this data to the yank history
     let defaultReg = yoink#getDefaultReg()
     if defaultReg ==# '*' || defaultReg == '+'
-        let currentInfo = yoink#getCurrentYankInfo()
+        let currentInfo = yoink#getDefaultYankInfo()
 
         if len(s:history) == 0 || s:history[0] != currentInfo
             " User copied something externally
@@ -278,7 +286,7 @@ function! yoink#manualYank(text, ...) abort
     let regType = a:0 ? a:1 : 'v'
     let entry = { 'text': a:text, 'type': regType }
     call yoink#tryAddToHistory(entry)
-    call yoink#setDefaultReg(entry)
+    call yoink#setDefaultYankInfo(entry)
 endfunction
 
 function! yoink#onYank(ev) abort
@@ -286,7 +294,7 @@ function! yoink#onYank(ev) abort
 
     if isValidRegister && (a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations)
         " Don't use a:ev.regcontents because it's a list of lines and not just the raw text 
-        " and the raw text is needed when comparing getCurrentYankInfo in a few places
+        " and the raw text is needed when comparing getDefaultYankInfo in a few places
         " above
         call yoink#tryAddToHistory({ 'text': getreg(a:ev.regname), 'type': a:ev.regtype })
     end
