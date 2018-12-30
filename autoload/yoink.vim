@@ -1,12 +1,30 @@
 
 scriptencoding utf-8
 
+let s:saveHistoryToShada = get(g:, 'yoinkSaveToShada', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
 let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
-let s:history = []
 let s:isSwapping = 0
 let s:offsetSum = 0
+
+if s:saveHistoryToShada
+    if !exists("g:YOINK_HISTORY")
+        let g:YOINK_HISTORY = []
+    endif
+else
+    let s:history = []
+    " If the setting is off then clear it to not keep taking up space
+    let g:YOINK_HISTORY = []
+endif
+
+function! yoink#getYankHistory()
+    if s:saveHistoryToShada
+        return g:YOINK_HISTORY
+    endif
+
+    return s:history
+endfunction
 
 function! yoink#getDefaultReg()
     let clipboardFlags = split(&clipboard, ',')
@@ -136,7 +154,9 @@ function! yoink#postPasteSwap(offset)
         return
     endif
 
-    if s:offsetSum + offset >= len(s:history)
+    let history = yoink#getYankHistory()
+
+    if s:offsetSum + offset >= len(history)
         echo 'Reached oldest item'
         return
     endif
@@ -153,26 +173,30 @@ function! yoink#startUndoRepeatSwap()
 endfunction
 
 function! yoink#onHistoryChanged()
+    let history = yoink#getYankHistory()
+
     " sync numbered registers
-    for i in range(1, min([len(s:history), 9]))
-        let entry = s:history[i-1]
+    for i in range(1, min([len(history), 9]))
+        let entry = history[i-1]
         call setreg(i, entry.text, entry.type)
     endfor
 endfunction
 
 function! yoink#tryAddToHistory(entry)
-    if !empty(a:entry.text) && (empty(s:history) || (a:entry != s:history[0]))
+    let history = yoink#getYankHistory()
+
+    if !empty(a:entry.text) && (empty(history) || (a:entry != history[0]))
         " If it's already in history then just move it to the front to avoid duplicates
-        for i in range(len(s:history))
-            if s:history[i] ==# a:entry
-                call remove(s:history, i)
+        for i in range(len(history))
+            if history[i] ==# a:entry
+                call remove(history, i)
                 break
             endif
         endfor
 
-        call insert(s:history, a:entry)
-        if len(s:history) > g:yoinkMaxItems
-            call remove(s:history, g:yoinkMaxItems, -1)
+        call insert(history, a:entry)
+        if len(history) > g:yoinkMaxItems
+            call remove(history, g:yoinkMaxItems, -1)
         endif
         call yoink#onHistoryChanged()
         return 1
@@ -182,15 +206,17 @@ function! yoink#tryAddToHistory(entry)
 endfunction
 
 function! yoink#rotate(offset)
-    if empty(s:history) || a:offset == 0
+    let history = yoink#getYankHistory()
+
+    if empty(history) || a:offset == 0
         return
     endif
 
     " If the default register has contents different than the first entry in our history,
     " then it must have changed through a delete operation or directly via setreg etc.
     " In this case, don't rotate and instead just update the default register
-    if s:history[0] != yoink#getDefaultYankInfo()
-        call yoink#setDefaultYankInfo(s:history[0])
+    if history[0] != yoink#getDefaultYankInfo()
+        call yoink#setDefaultYankInfo(history[0])
         call yoink#onHistoryChanged()
         return
     endif
@@ -199,17 +225,17 @@ function! yoink#rotate(offset)
 
     while offsetLeft != 0
         if offsetLeft > 0
-            let l:entry = remove(s:history, 0)
-            call add(s:history, l:entry)
+            let l:entry = remove(history, 0)
+            call add(history, l:entry)
             let offsetLeft -= 1
         elseif offsetLeft < 0
-            let l:entry = remove(s:history, -1)
-            call insert(s:history, l:entry)
+            let l:entry = remove(history, -1)
+            call insert(history, l:entry)
             let offsetLeft += 1
         endif
     endwhile
 
-    call yoink#setDefaultYankInfo(s:history[0])
+    call yoink#setDefaultYankInfo(history[0])
     call yoink#onHistoryChanged()
 endfunction
 
@@ -218,10 +244,11 @@ function! yoink#addCurrentToHistory()
 endfunction
 
 function! yoink#clearYanks()
-    let l:size = len(s:history)
-    let s:history = []
+    let history = yoink#getYankHistory()
+    let previousSize = len(history)
+    call remove(history, 0, -1)
     call yoink#addCurrentToHistory()
-    echo "Cleared yank history of " . l:size . " entries"
+    echo "Cleared yank history of " . previousSize . " entries"
 endfunction
 
 function! yoink#getDefaultYankText()
@@ -244,14 +271,10 @@ function! yoink#getYankInfoForReg(reg)
     return { 'text': getreg(a:reg), 'type': getregtype(a:reg) }
 endfunction
 
-function! yoink#getYankHistory()
-    return s:history
-endfunction
-
 function! yoink#showYanks()
     echohl WarningMsg | echo "--- Yanks ---" | echohl None
     let i = 0
-    for yank in s:history
+    for yank in yoink#getYankHistory()
         call yoink#showYank(yank, i)
         let i += 1
     endfor
@@ -290,6 +313,8 @@ function! yoink#onFocusGained()
         return
     endif
 
+    let history = yoink#getYankHistory()
+
     " If we are using the system register as the default register
     " and the user leaves vim, copies something, then returns,
     " we want to add this data to the yank history
@@ -297,7 +322,7 @@ function! yoink#onFocusGained()
     if defaultReg ==# '*' || defaultReg == '+'
         let currentInfo = yoink#getDefaultYankInfo()
 
-        if len(s:history) == 0 || s:history[0] != currentInfo
+        if len(history) == 0 || history[0] != currentInfo
             " User copied something externally
             call yoink#tryAddToHistory(currentInfo)
         endif

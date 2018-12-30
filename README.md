@@ -64,6 +64,14 @@ You can optionally override the default behaviour with the following settings:
 
 `g:yoinkMoveCursorToEndOfPaste` - When set to `1`, the cursor will always be placed at the end of the paste.  Default is to match normal vim behaviour (`0`) which places cursor at the beginning when pasting multiline yanks.  Setting to `1` can be nicer because it makes the post-paste cursor position more consistent between multiline and non-multiline pastes (that is, it is at the end in both cases).  And also causes consecutive multiline pastes to be ordered correctly.
 
+`g:yoinkSavePersistently` - When set to `1`, the yank history will be saved persistently across sessions of vim.  Note: Requires Neovim.  See <a href="#shada-support">here</a> for details. Default: `0`
+
+## <a id="shada-support"></a>Persistent/Shared History
+
+When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature (Note: therefore this is not possible with Vim).
+
+You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file by running `:wshada` in the first instance and then `rshada` in the second instance.
+
 ## System Clipboard
 
 Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by observing the `FocusGained` autocommand and then checking if the system clipboard was changed and if so adding it to the history.
