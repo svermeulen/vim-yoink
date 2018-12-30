@@ -18,10 +18,11 @@ function! yoink#getDefaultReg()
     endif
 endfunction
 
-function! yoink#paste(pasteType)
+function! yoink#paste(pasteType, reg)
     let count = v:count > 0 ? v:count : 1
-    exec "normal! " . count . a:pasteType
+    exec "normal! \"" . a:reg . count . a:pasteType
     call yoink#startUndoRepeatSwap()
+    silent! call repeat#setreg(fullPlugName, a:reg)
     silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", count)
 endfunction
 
@@ -263,11 +264,9 @@ function! yoink#manualYank(text, ...) abort
 endfunction
 
 function! yoink#onYank(ev) abort
-    if a:ev.regname != '' && a:ev.regname == yoink#getDefaultReg()
-        return
-    endif
+    let isValidRegister = a:ev.regname == '' || a:ev.regname == yoink#getDefaultReg()
 
-    if a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations
+    if isValidRegister && (a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations)
         " Don't use a:ev.regcontents because it's a list of lines and not just the raw text 
         " and the raw text is needed when comparing getCurrentYankInfo in a few places
         " above

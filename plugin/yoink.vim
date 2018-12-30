@@ -52,8 +52,8 @@ nnoremap <silent> <plug>(YoinkRotateBack) :<c-u>call yoink#rotateThenPrint(1)<cr
 nnoremap <silent> <plug>(YoinkPostPasteSwapForward) :<c-u>call yoink#postPasteSwap(-1)<cr>
 nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :<c-u>call yoink#postPasteSwap(1)<cr>
 
-nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>call yoink#paste('p')<cr>
-nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>call yoink#paste('P')<cr>
+nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>call yoink#paste('p', v:register)<cr>
+nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>call yoink#paste('P', v:register)<cr>
 
 xnoremap <silent> <plug>(YoinkPasteVisualMode) :call yoink#visualModePaste()<cr>
 

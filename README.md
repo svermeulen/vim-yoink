@@ -7,7 +7,7 @@ This is just another killring style vim plugin similar to [nvim-miniyank](https:
 
 Note: Requires either Neovim or Vim 8+, and also vim-repeat to be installed alongside it
 
-Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/pull/66) to vim-repeat to be merged to work properly
+Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/pull/66) to vim-repeat to be merged to work properly (or you can directly use [svermeulen/vim-repeat](https://github.com/svermeulen/vim-repeat))
 
 ## Example Config
 
