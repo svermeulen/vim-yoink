@@ -24,6 +24,8 @@ function! yoink#paste(pasteType, reg)
     exec "normal! \"" . a:reg . cnt . a:pasteType
 
     if s:autoFormat
+        " For some reason, the format operation does not update the ] mark properly so we
+        " have to do this manually
         let endPos = getpos("']")
         let oldIndentAmount = indent(endPos[1])
         silent exec "keepjumps normal! `[=`]"
@@ -39,6 +41,10 @@ function! yoink#paste(pasteType, reg)
             " Default vim behaviour is to place cursor at the beginning of the new text
             " Auto format can change this sometimes so ensure this is fixed
             call setpos(".", getpos("'["))
+        else
+            " Do nothing
+            " Make sure paste with yoinkAutoFormatPaste and yoinkMoveCursorToEndOfPaste off is
+            " always identical to normal vim
         endif
     endif
 
