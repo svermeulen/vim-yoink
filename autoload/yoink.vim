@@ -1,7 +1,7 @@
 
 scriptencoding utf-8
 
-let s:saveHistoryToShada = get(g:, 'yoinkSaveToShada', 0)
+let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
 let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
