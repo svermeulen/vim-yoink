@@ -56,7 +56,7 @@ Note that yoink does not support swapping when doing paste in visual mode.  Howe
 
 You can optionally override the default behaviour with the following settings:
 
-- `g:yoinkMaxItems` - History size. Default: `20`
+- `g:yoinkMaxItems` - History size. Default: `10`
 - `g:yoinkIncludeDeleteOperations` - When set to `1`, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
 - `g:yoinkSavePersistently` - When set to `1`, the yank history will be saved persistently across sessions of vim.  Note: Requires Neovim.  See <a href="#shada-support">here</a> for details. Default: `0`
 - `g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
@@ -65,9 +65,9 @@ You can optionally override the default behaviour with the following settings:
 
 ## <a id="shada-support"></a>Persistent/Shared History
 
-When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature (Note: therefore this is not possible with Vim).
+When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature (however this is not supported for Vim)
 
-You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file by running `:wshada` in the first instance and then `rshada` in the second instance.
+You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file.  For example, if you execute `:wshada` in the first instance and then `rshada` in the second instance, the second instance will be synced with the yank history in the first instance.  If this becomes a common operation you might consider using key bindings for this.
 
 ## System Clipboard
 

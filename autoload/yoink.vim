@@ -1,6 +1,13 @@
 
 scriptencoding utf-8
 
+let g:yoinkMaxItems = get(g:, 'yoinkMaxItems', 10)
+let g:yoinkShowYanksWidth = get(g:, 'yoinkShowYanksWidth', 80)
+let g:yoinkIncludeDeleteOperations = get(g:, 'yoinkIncludeDeleteOperations', 0)
+let g:yoinkSyncSystemClipboardOnFocus = get(g:, 'yoinkSyncSystemClipboardOnFocus', 1)
+let g:yoinkAutoFormatPaste = get(g:, 'yoinkAutoFormatPaste', 0)
+let g:yoinkMoveCursorToEndOfPaste = get(g:, 'yoinkMoveCursorToEndOfPaste', 0)
+
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
 let s:lastSwapStartChangedtick = -1
