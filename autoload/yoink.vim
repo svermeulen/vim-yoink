@@ -14,6 +14,7 @@ let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:isSwapping = 0
 let s:offsetSum = 0
+let s:yankStartPos = []
 
 if s:saveHistoryToShada
     if !exists("g:YOINK_HISTORY")
@@ -30,6 +31,25 @@ else
     " If the setting is off then clear it to not keep taking up space
     let g:YOINK_HISTORY = []
 endif
+
+function! s:clearYankStartPos()
+    let s:yankStartPos = []
+
+    augroup YoinkYankStartClear
+        autocmd!
+    augroup END
+endfunction
+
+function! yoink#startYankPreserveCursorPosition()
+    let s:yankStartPos = getpos('.')
+
+    augroup YoinkYankStartClear
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>clearYankStartPos()
+    augroup END
+
+    return "y"
+endfunction
 
 function! yoink#getYankHistory()
     if s:saveHistoryToShada
@@ -359,6 +379,11 @@ function! yoink#onYank(ev) abort
         " above
         call yoink#tryAddToHistory({ 'text': getreg(a:ev.regname), 'type': a:ev.regtype })
     end
+
+    if (a:ev.operator == 'y' && len(s:yankStartPos) > 0)
+        call setpos('.', s:yankStartPos)
+        call s:clearYankStartPos()
+    endif
 endfunction
 
 " For when re-sourcing this file after a paste

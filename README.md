@@ -27,6 +27,8 @@ With these mappings, immediately after performing a paste, you can cycle through
 
 We also need to override the `p` and `P` keys to notify Yoink that a paste has occurred, so that swapping via the `<c-n>` and `<c-p>` keys can be enabled.
 
+Note that yoink does not support swapping when doing paste in visual mode.  However, the [vim-subversive](https://github.com/svermeulen/vim-subversive) plugin integrates with Yoink and does provide that functionality.
+
 Note that the swap operations above will only affect the current paste and the history order will be unchanged.  However - if you do want to permanently cycle through the history, you can do that too:
 
 ```viml
@@ -42,9 +44,15 @@ You might also want to add a map for toggling whether the current paste is forma
 nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
 ```
 
-Now, hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards using `<c-=>` (however you can change this with a setting as described below)
+Now, hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards using `<c-=>` (however you can change this with the `yoinkAutoFormatPaste` setting as described below)
 
-Note that yoink does not support swapping when doing paste in visual mode.  However, if you also install [vim-subversive](https://github.com/svermeulen/vim-subversive), that actually does contain a map you can use for that.
+Finally, you can also optionally add the following map:
+
+```viml
+nmap y <plug>(YoinkYankPreserveCursorPosition)
+```
+
+After adding this map, yank will function exactly the same as previously with the one difference being that the cursor position will not change afterwards.  This can be more useful especially when yanking a large text object such as a paragraph.
 
 ## Commands
 
