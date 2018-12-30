@@ -11,9 +11,9 @@ Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/p
 
 ## Mappings
 
-Note that there are no default mappings.  Yoink will automatically record all yanks into a history by observing the `TextYankPost` autocommand added in Neovim and Vim 8+.  But you will need to define some mappings to navigate this history.  
+Note that Yoink will not affect the way Vim behaves after initially installing it.  You have to add some maps or enable one of the optional settings to produce an effect.
 
-You will at least want to define maps for paste and swap paste:
+For example, if you want to add a key to swap the most recent paste around in the yank history:
 
 ```viml
 nmap <c-n> <plug>(YoinkPostPasteSwapBack)
