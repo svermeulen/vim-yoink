@@ -9,7 +9,7 @@ Note: Requires either Neovim or Vim 8+, and also vim-repeat to be installed alon
 
 Also Note:  This plugin requires [this PR](https://github.com/tpope/vim-repeat/pull/66) to vim-repeat to be merged to work properly (or you can directly use [svermeulen/vim-repeat](https://github.com/svermeulen/vim-repeat))
 
-## Example Config
+## Mappings
 
 Note that there are no default mappings.  Yoink will automatically record all yanks into a history by observing the `TextYankPost` autocommand added in Neovim and Vim 8+.  But you will need to define some mappings to navigate this history.  
 
@@ -47,9 +47,13 @@ You might also want to add a map for toggling whether the current paste is forma
 nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
 ```
 
-Note that with these mappings you can use both `<c-=>` and `<c-n>`/`<c-p>` at the same time.  Hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards (however you can change this with a setting as described below)
+Now, hitting `<c-=>` after a paste will toggle between formatted and unformatted (equivalent to using the `=` key).  By default pastes will not be formatted until you toggle it afterwards using `<c-=>` (however you can change this with a setting as described below)
 
-You can also view the current history by executing the command `:Yanks`.  And you can clear the history by executing `:ClearYanks`
+## Commands
+
+`:Yanks` - Display the current yank history
+
+`:ClearYanks` - Delete history
 
 ## Settings
 
