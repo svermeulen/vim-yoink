@@ -62,7 +62,7 @@ You can optionally override the default behaviour with the following settings:
 
 `g:yoinkAutoFormatPaste` - When set to `1`, after a paste occurs it will automatically be formatted (using `=` key).  Default: `0`.  Note that you can leave this off and just use the toggle key instead for cases where you want to format after the paste.
 
-`g:yoinkMoveCursorToEndOfPaste` - When set to `1`, the cursor will always be placed at the end of the paste.  Default is to match normal vim behaviour (`0`) which places cursor at the beginning when pasting multiline yanks.
+`g:yoinkMoveCursorToEndOfPaste` - When set to `1`, the cursor will always be placed at the end of the paste.  Default is to match normal vim behaviour (`0`) which places cursor at the beginning when pasting multiline yanks.  Setting to `1` can be nicer because it makes the post-paste cursor position more consistent between multiline and non-multiline pastes (that is, it is at the end in both cases).  And also causes consecutive multiline pastes to be ordered correctly.
 
 ## System Clipboard
 
