@@ -22,12 +22,26 @@ endfunction
 function! yoink#paste(pasteType, reg)
     let cnt = v:count > 0 ? v:count : 1
     exec "normal! \"" . a:reg . cnt . a:pasteType
+
     if s:autoFormat
-        normal! `[=`]
+        let endPos = getpos("']")
+        let oldIndentAmount = indent(endPos[1])
+        silent exec "keepjumps normal! `[=`]"
+        let newIndentAmount = indent(endPos[1])
+        let endPos[2] += newIndentAmount - oldIndentAmount
+        call setpos("']", endPos)
     endif
+
     if g:yoinkMoveCursorToEndOfPaste
-        exec "keepjumps normal! `]"
+        call setpos(".", getpos("']"))
+    else
+        if s:autoFormat
+            " Default vim behaviour is to place cursor at the beginning of the new text
+            " Auto format can change this sometimes so ensure this is fixed
+            call setpos(".", getpos("'["))
+        endif
     endif
+
     call yoink#startUndoRepeatSwap()
     silent! call repeat#setreg(fullPlugName, a:reg)
     silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", cnt)
