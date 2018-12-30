@@ -19,6 +19,12 @@ if s:saveHistoryToShada
     if !exists("g:YOINK_HISTORY")
         let g:YOINK_HISTORY = []
     endif
+
+    if !has("nvim")
+        echoerr "Neovim is required when setting g:yoinkSavePersistently to 1"
+    elseif &shada !~ '\V!'
+        echoerr "Must enable global variable support by including ! in the shada property when setting g:yoinkSavePersistently to 1.  See yoink documentation for details or run :help 'shada'."
+    endif
 else
     let s:history = []
     " If the setting is off then clear it to not keep taking up space
