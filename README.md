@@ -67,13 +67,13 @@ You can optionally override the default behaviour with the following settings:
 
 When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature (however this is not supported for Vim)
 
-You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file.  For example, if you execute `:wshada` in the first instance and then `rshada` in the second instance, the second instance will be synced with the yank history in the first instance.  If this becomes a common operation you might consider using key bindings for this.
+You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file.  For example, if you execute `:wshada` in the first instance and then `:rshada` in the second instance, the second instance will be synced with the yank history in the first instance.  If this becomes a common operation you might consider using key bindings for this.
 
 Note also that the `!` option must be added to Neovims `shada` setting.  For example:  `set shada=!,'100,<50,s10,h` (see `:h 'shada'` for details)
 
 ## System Clipboard
 
-Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by observing the `FocusGained` autocommand and then checking if the system clipboard was changed and if so adding it to the history.
+Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by checking if the system clipboard was changed every time Vim gains focus and if so adding the new yank to the history.
 
 ## Other Notes
 
