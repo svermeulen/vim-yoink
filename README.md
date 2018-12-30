@@ -34,6 +34,8 @@ nmap [y <plug>(YoinkRotateBack)
 nmap ]y <plug>(YoinkRotateForward)
 ```
 
+Note that when you hit `[y`/`]y` you will see a preview of the new yank in the status bar.
+
 You might also want to add a map for toggling whether the current paste is formatted or not:
 
 ```viml
@@ -73,5 +75,6 @@ Another feature worth mentioning is that if you have `&clipboard` set to either 
 
 ## Other Notes
 
+* Yoink will only add to the history when a yank occurs on the default register.  If you explicitly name a register for a yank it will not be recorded
 * If you want to add to the yank history from your own vimscript code, you can do this by calling `yoink#manualYank`
 
