@@ -71,7 +71,7 @@ You can optionally override the default behaviour with the following settings:
 
 ## <a id="shada-support"></a>Persistent/Shared History
 
-When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature (however this is not supported for Vim)
+When `g:yoinkSavePersistently` is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature.  Note that since ShaDa support only exists in Neovim therefore persistent history is not supported in Vim.
 
 You can also use this feature to sync the yank history across multiple running instances of vim by updating Neovim's shada file.  For example, if you execute `:wshada` in the first instance and then `:rshada` in the second instance, the second instance will be synced with the yank history in the first instance.  If this becomes a common operation you might consider using key bindings for this.
 
