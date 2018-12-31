@@ -50,6 +50,7 @@ Finally, you can also optionally add the following map:
 
 ```viml
 nmap y <plug>(YoinkYankPreserveCursorPosition)
+xmap y <plug>(YoinkYankPreserveCursorPosition)
 ```
 
 After adding this map, yank will function exactly the same as previously with the one difference being that the cursor position will not change afterwards.  This can be more useful especially when yanking a large text object such as a paragraph.

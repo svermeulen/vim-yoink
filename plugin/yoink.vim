@@ -53,6 +53,7 @@ nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>call yoink#paste('P', v:register)<c
 nnoremap <silent> <plug>(YoinkPostPasteToggleFormat) :<c-u>call yoink#postPasteToggleFormat()<cr>
 
 nnoremap <silent> <expr> <plug>(YoinkYankPreserveCursorPosition) yoink#startYankPreserveCursorPosition()
+xnoremap <silent> <expr> <plug>(YoinkYankPreserveCursorPosition) yoink#startYankPreserveCursorPosition()
 
 command! -nargs=0 Yanks call yoink#showYanks()
 command! -nargs=0 ClearYanks call yoink#clearYanks()
