@@ -19,14 +19,17 @@ let s:offsetSum = 0
 let s:yankStartCursorPos = []
 let s:yankStartWinView = {}
 
-let s:hasCutlass = 0
+let s:currentPasteType = ''
+let s:currentPasteRegister = ''
+
+let s:isCutlassInstalled = 0
 try
     call cutlass#getVersion()
-    let s:hasCutlass = 1
+    let s:isCutlassInstalled = 1
 catch /\VUnknown function/
 endtry
 
-if s:hasCutlass && !g:yoinkIncludeDeleteOperations
+if s:isCutlassInstalled && !g:yoinkIncludeDeleteOperations
     echoerr "Detected both cutlass and yoink installed - however g:yoinkIncludeDeleteOperations is set to 0.  You probably want to set it to 1 instead so that your binding for cut will be added to the yank history"
 endif
 
@@ -86,9 +89,14 @@ function! yoink#getDefaultReg()
     endif
 endfunction
 
-function! yoink#paste(pasteType, reg)
+function! yoink#setupPaste(pasteType, reg)
+    let s:currentPasteType = a:pasteType
+    let s:currentPasteRegister = a:reg
+endfunction
+
+function! yoink#paste(...)
     let cnt = v:count > 0 ? v:count : 1
-    exec "normal! \"" . a:reg . cnt . a:pasteType
+    exec "normal! \"" . s:currentPasteRegister . cnt . s:currentPasteType
 
     if s:autoFormat
         " For some reason, the format operation does not update the ] mark properly so we
@@ -116,8 +124,6 @@ function! yoink#paste(pasteType, reg)
     endif
 
     call yoink#startUndoRepeatSwap()
-    silent! call repeat#setreg(fullPlugName, a:reg)
-    silent! call repeat#set("\<plug>(YoinkPaste_" . a:pasteType . ")", cnt)
 endfunction
 
 function! s:postSwapCursorMove2()
@@ -176,7 +182,7 @@ function! yoink#performSwap()
         autocmd!
     augroup END
 
-    exec "normal \<Plug>(RepeatUndo)\<Plug>(RepeatDot)"
+    exec "normal! u."
 
     let s:lastSwapChangedtick = b:changedtick
 
