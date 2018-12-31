@@ -83,6 +83,10 @@ Note also that the `!` option must be added to Neovims `shada` setting.  For exa
 
 Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that have occurred outside of vim.  It does this by checking if the system clipboard was changed every time Vim gains focus and if so adding the new yank to the history.
 
+## Integration with vim-cutlass
+
+If you also have vim-cutlass installed then I suggest you set `g:yoinkIncludeDeleteOperations` to 1.  Otherwise the 'cut' operator that you use will not be added to the yank history.
+
 ## Other Notes
 
 * Yoink will only add to the history when a yank occurs on the default register.  If you explicitly name a register for a yank it will not be recorded

@@ -16,6 +16,17 @@ let s:isSwapping = 0
 let s:offsetSum = 0
 let s:yankStartPos = []
 
+let s:hasCutlass = 0
+try
+    call cutlass#getVersion()
+    let s:hasCutlass = 1
+catch /\VUnknown function/
+endtry
+
+if s:hasCutlass && !g:yoinkIncludeDeleteOperations
+    echoerr "Detected both cutlass and yoink installed - however g:yoinkIncludeDeleteOperations is set to 0.  You probably want to set it to 1 instead so that your binding for cut will be added to the yank history"
+endif
+
 if s:saveHistoryToShada
     if !exists("g:YOINK_HISTORY")
         let g:YOINK_HISTORY = []
