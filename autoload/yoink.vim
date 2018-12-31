@@ -7,6 +7,7 @@ let g:yoinkIncludeDeleteOperations = get(g:, 'yoinkIncludeDeleteOperations', 0)
 let g:yoinkSyncSystemClipboardOnFocus = get(g:, 'yoinkSyncSystemClipboardOnFocus', 1)
 let g:yoinkAutoFormatPaste = get(g:, 'yoinkAutoFormatPaste', 0)
 let g:yoinkMoveCursorToEndOfPaste = get(g:, 'yoinkMoveCursorToEndOfPaste', 0)
+let g:yoinkSyncNumberedRegisters = get(g:, 'yoinkSyncNumberedRegisters', 0)
 
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
@@ -221,13 +222,15 @@ function! yoink#startUndoRepeatSwap()
 endfunction
 
 function! yoink#onHistoryChanged()
-    let history = yoink#getYankHistory()
+    if g:yoinkSyncNumberedRegisters
+        let history = yoink#getYankHistory()
 
-    " sync numbered registers
-    for i in range(1, min([len(history), 9]))
-        let entry = history[i-1]
-        call setreg(i, entry.text, entry.type)
-    endfor
+        " sync numbered registers
+        for i in range(1, min([len(history), 9]))
+            let entry = history[i-1]
+            call setreg(i, entry.text, entry.type)
+        endfor
+    endif
 endfunction
 
 function! yoink#tryAddToHistory(entry)

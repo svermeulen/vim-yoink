@@ -65,7 +65,8 @@ After adding this map, yank will function exactly the same as previously with th
 
 You can optionally override the default behaviour with the following settings:
 
-- `g:yoinkMaxItems` - History size. Default: `10`
+- `g:yoinkMaxItems` - History size. Default: `10`.
+- `g:yoinkSyncNumberedRegisters` - When set to `1`, every time the yank history changes the numbered registers 1 - 9 will be updated to sync with the first 9 entries in the yank history.  See [here](http://vimcasts.org/blog/2013/11/registers-the-good-the-bad-and-the-ugly-parts/) for an explanation of why we would want do do this. Default: `0`.
 - `g:yoinkIncludeDeleteOperations` - When set to `1`, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
 - `g:yoinkSavePersistently` - When set to `1`, the yank history will be saved persistently across sessions of vim.  Note: Requires Neovim.  See <a href="#shada-support">here</a> for details. Default: `0`
 - `g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
