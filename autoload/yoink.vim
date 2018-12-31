@@ -94,10 +94,7 @@ function! yoink#setupPaste(pasteType, reg)
     let s:currentPasteRegister = a:reg
 endfunction
 
-function! yoink#paste(...)
-    let l:count = v:count > 0 ? v:count : 1
-    exec "normal! \"" . s:currentPasteRegister . l:count . s:currentPasteType
-
+function! yoink#adjustLastChangeIfNecessary()
     if s:autoFormat
         " For some reason, the format operation does not update the ] mark properly so we
         " have to do this manually
@@ -122,7 +119,12 @@ function! yoink#paste(...)
             " always identical to normal vim
         endif
     endif
+endfunction
 
+function! yoink#paste(...)
+    let l:count = v:count > 0 ? v:count : 1
+    exec "normal! \"" . s:currentPasteRegister . l:count . s:currentPasteType
+    call yoink#adjustLastChangeIfNecessary()
     call yoink#startUndoRepeatSwap()
 endfunction
 
@@ -154,6 +156,7 @@ endfunction
 function! yoink#postPasteToggleFormat()
     if yoink#tryStartSwap()
         let s:autoFormat = !s:autoFormat
+        echo "Turned " . (s:autoFormat ? "on" : "off") . " formatting"
         call yoink#performSwap()
     endif
 endfunction
