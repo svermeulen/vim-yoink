@@ -14,7 +14,9 @@ let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:isSwapping = 0
 let s:offsetSum = 0
-let s:yankStartPos = []
+
+let s:yankStartCursorPos = []
+let s:yankStartWinView = {}
 
 let s:hasCutlass = 0
 try
@@ -43,8 +45,9 @@ else
     let g:YOINK_HISTORY = []
 endif
 
-function! s:clearYankStartPos()
-    let s:yankStartPos = []
+function! s:clearYankStartData()
+    let s:yankStartCursorPos = []
+    let s:yankStartWinView = {}
 
     augroup YoinkYankStartClear
         autocmd!
@@ -52,11 +55,12 @@ function! s:clearYankStartPos()
 endfunction
 
 function! yoink#startYankPreserveCursorPosition()
-    let s:yankStartPos = getpos('.')
+    let s:yankStartCursorPos = getpos('.')
+    let s:yankStartWinView = winsaveview()
 
     augroup YoinkYankStartClear
         autocmd!
-        autocmd CursorMoved <buffer> call <sid>clearYankStartPos()
+        autocmd CursorMoved <buffer> call <sid>clearYankStartData()
     augroup END
 
     return "y"
@@ -391,9 +395,10 @@ function! yoink#onYank(ev) abort
         call yoink#tryAddToHistory({ 'text': getreg(a:ev.regname), 'type': a:ev.regtype })
     end
 
-    if (a:ev.operator == 'y' && len(s:yankStartPos) > 0)
-        call setpos('.', s:yankStartPos)
-        call s:clearYankStartPos()
+    if (a:ev.operator == 'y' && len(s:yankStartCursorPos) > 0)
+        call setpos('.', s:yankStartCursorPos)
+        call winrestview(s:yankStartWinView)
+        call s:clearYankStartData()
     endif
 endfunction
 
