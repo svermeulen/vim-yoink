@@ -95,8 +95,8 @@ function! yoink#setupPaste(pasteType, reg)
 endfunction
 
 function! yoink#paste(...)
-    let cnt = v:count > 0 ? v:count : 1
-    exec "normal! \"" . s:currentPasteRegister . cnt . s:currentPasteType
+    let l:count = v:count > 0 ? v:count : 1
+    exec "normal! \"" . s:currentPasteRegister . l:count . s:currentPasteType
 
     if s:autoFormat
         " For some reason, the format operation does not update the ] mark properly so we
@@ -182,7 +182,7 @@ function! yoink#performSwap()
         autocmd!
     augroup END
 
-    exec "normal! u."
+    normal! u.
 
     let s:lastSwapChangedtick = b:changedtick
 
