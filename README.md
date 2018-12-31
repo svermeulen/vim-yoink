@@ -85,7 +85,7 @@ Another feature worth mentioning is that if you have `&clipboard` set to either 
 
 ## Integration with vim-cutlass
 
-If you also have vim-cutlass installed then I suggest you set `g:yoinkIncludeDeleteOperations` to 1.  Otherwise the 'cut' operator that you use will not be added to the yank history.
+If you also have [vim-cutlass](https://github.com/svermeulen/vim-cutlass) installed then I suggest you set `g:yoinkIncludeDeleteOperations` to 1.  Otherwise the 'cut' operator that you use will not be added to the yank history.
 
 ## Other Notes
 
