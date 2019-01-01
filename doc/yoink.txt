@@ -1,0 +1,91 @@
+*yoink.txt*  Provides a yank history to cycle between when pasting
+
+Author:  Steve Vermeulen <http://www.stevevermeulen.com/>
+License: MIT
+
+INTRODUCTION                                    *yoink*
+
+Yoink will automatically maintain a history of yanks that you can choose between when pasting.
+
+It provides very similar functionality to nvim-miniyank (https://github.com/bfredl/nvim-miniyank), YankRing.vim (https://github.com/vim-scripts/YankRing.vim), vim-yankstack (https://github.com/maxbrunsfeld/vim-yankstack) or the yank features in vim-easyclip (https://github.com/svermeulen/vim-easyclip).
+
+MAPPINGS					*yoink-mappings*
+
+Note that by default Yoink will not affect the way Vim behaves in any way.  You have to add one or more of the following maps or enable one of the optional settings to produce an effect.
+
+For example, if you want to add a key to swap the most recent paste around in the yank history:
+
+    nmap <c-n> <plug>(YoinkPostPasteSwapBack)
+    nmap <c-p> <plug>(YoinkPostPasteSwapForward)
+
+    nmap p <plug>(YoinkPaste_p)
+    nmap P <plug>(YoinkPaste_P)
+
+With these mappings, immediately after performing a paste, you can cycle through the history by hitting <c-n> and <c-p>
+
+We also need to override the |p| and |P| keys to notify Yoink that a paste has occurred, so that swapping via the <c-n> and <c-p> keys can be enabled.  Otherwise paste functionality should be the same as default.
+
+Note that yoink does not support swapping when doing paste in visual mode and so we do not add an |xmap| for |p| here.  However, the vim-subversive (https://github.com/svermeulen/vim-subversive) plugin integrates with Yoink and does provide that functionality.
+
+Note that the swap operations above will only affect the current paste and the history order will be unchanged.  However - if you do want to permanently cycle through the history, you can do that too:
+
+    nmap [y <plug>(YoinkRotateBack)
+    nmap ]y <plug>(YoinkRotateForward)
+
+Now when you hit [y or ]y the current yank will change and you will see a preview of it in the status bar
+
+You might also want to add a map for toggling whether the current paste is formatted or not:
+
+    nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
+
+Now, hitting <c-=> after a paste will toggle between formatted and unformatted (equivalent to using the |=| key).  By default pastes will not be formatted until you toggle it afterwards using <c-=> (however you can also change this with the |yoinkAutoFormatPaste| setting as described below)
+
+Finally, you can also optionally add the following map:
+
+    nmap y <plug>(YoinkYankPreserveCursorPosition)
+    xmap y <plug>(YoinkYankPreserveCursorPosition)
+
+After adding this map, yank will function exactly the same as previously with the one difference being that the cursor position will not change after performing a yank.  This can be more useful especially when yanking a large text object such as a paragraph.
+
+COMMANDS					*yoink-commands*
+
+*:Yanks* - Display the current yank history
+
+*:ClearYanks* - Delete history.  This will reduce the history down to 1 entry taken from the default register.
+
+SETTINGS					*yoink-settings*
+
+You can optionally override the default behaviour with the following settings:
+
+- *g:yoinkMaxItems* - History size. Default: 10.
+- *g:yoinkSyncNumberedRegisters* - When set to 1, every time the yank history changes the numbered registers 1 - 9 will be updated to sync with the first 9 entries in the yank history.  See this article (http://vimcasts.org/blog/2013/11/registers-the-good-the-bad-and-the-ugly-parts/) for an explanation of why we would want do do this. Default: 0.
+- *g:yoinkIncludeDeleteOperations* - When set to 1, delete operations such as |x| or |d| or |s| will also be added to the yank history.  Default: 0
+- *g:yoinkSavePersistently* - When set to 1, the yank history will be saved persistently across sessions of Vim.  Note: Requires Neovim.  See <a href="#shada-support">here</a> for details. Default: 0
+- *g:yoinkSyncSystemClipboardOnFocus* - When set to 0, the System Clipboard feature described below will be disabled.  Default: 1
+- *g:yoinkAutoFormatPaste* - When set to 1, after a paste occurs it will automatically be formatted (using |=| key).  Default: 0.  Note that you can also leave this off and use the toggle key instead for cases where you want to format after the paste.
+- *g:yoinkMoveCursorToEndOfPaste* - When set to 1, the cursor will always be placed at the end of the paste.  Default is 0 which will match normal Vim behaviour and place the cursor at the beginning when pasting multiline yanks.  Setting to 1 can be nicer because it makes the post-paste cursor position more consistent between multiline and non-multiline pastes (that is, the cursor will be at the end in both cases).  And also causes consecutive multiline pastes to be ordered correctly instead of interleaved together.
+
+PERSISTENT HISTORY					*yoink-persistent-history*
+
+When |g:yoinkSavePersistently| is set to 1, the yank history will be saved persistently by taking advantage of Neovim's "ShaDa" feature.  Note that since ShaDa support only exists in Neovim this feature is not available for Vim.
+
+You can also use this feature to sync the yank history across multiple running instances of Vim by updating Neovim's shada file.  For example, if you execute |:wshada| in the first instance and then |:rshada| in the second instance, the second instance will be synced with the yank history in the first instance.  If this becomes a common operation you might consider using key bindings for this.
+
+Note also that the ! option must be added to Neovims |shada| setting for this feature to work.  For example:  "set shada=!,'100,<50,s10,h"
+
+SYSTEM CLIPBOARD SYNC					*yoink-system-clipboard-sync*
+
+Another feature worth mentioning is that if you have |clipboard| set to either |unnamed| or |unnamedplus| then Yoink will automatically record yanks that occur outside of Vim.  It does this by checking if the system clipboard was changed every time Vim gains focus and if so adding the new yank to the history.
+
+Note that if you don't like this behaviour you can disable it by setting |g:yoinkSyncSystemClipboardOnFocus| to 0
+
+CUTLASS INTEGRATION					*yoink-cutlass-integration*
+
+If you also have vim-cutlass (https://github.com/svermeulen/vim-cutlass) installed then I suggest you set |g:yoinkIncludeDeleteOperations| to 1.  Otherwise the 'cut' operator that you use will not be added to the yank history.
+
+OTHER NOTES					*yoink-other-notes*
+
+* Yoink will only add to the history when a yank occurs on the default register.  If you explicitly name a register for a yank it will not be recorded
+* If you want to add to the yank history from your own vimscript code, you can do this by calling *yoink#manualYank*
+
+ vim:tw=78:ts=8:ft=help:norl:
