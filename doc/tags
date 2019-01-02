@@ -5,6 +5,7 @@ g:yoinkIncludeDeleteOperations	yoink.txt	/*g:yoinkIncludeDeleteOperations*
 g:yoinkMaxItems	yoink.txt	/*g:yoinkMaxItems*
 g:yoinkMoveCursorToEndOfPaste	yoink.txt	/*g:yoinkMoveCursorToEndOfPaste*
 g:yoinkSavePersistently	yoink.txt	/*g:yoinkSavePersistently*
+g:yoinkSwapClampAtEnds	yoink.txt	/*g:yoinkSwapClampAtEnds*
 g:yoinkSyncNumberedRegisters	yoink.txt	/*g:yoinkSyncNumberedRegisters*
 g:yoinkSyncSystemClipboardOnFocus	yoink.txt	/*g:yoinkSyncSystemClipboardOnFocus*
 yoink	yoink.txt	/*yoink*
