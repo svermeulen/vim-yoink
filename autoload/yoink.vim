@@ -8,6 +8,7 @@ let g:yoinkSyncSystemClipboardOnFocus = get(g:, 'yoinkSyncSystemClipboardOnFocus
 let g:yoinkAutoFormatPaste = get(g:, 'yoinkAutoFormatPaste', 0)
 let g:yoinkMoveCursorToEndOfPaste = get(g:, 'yoinkMoveCursorToEndOfPaste', 0)
 let g:yoinkSyncNumberedRegisters = get(g:, 'yoinkSyncNumberedRegisters', 0)
+let g:yoinkSwapClampAtEnds = get(g:, 'yoinkSwapClampAtEnds', 1)
 
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
@@ -207,16 +208,18 @@ function! yoink#postPasteSwap(offset)
     let cnt = v:count > 0 ? v:count : 1
     let offset = a:offset * cnt
 
-    if s:offsetSum + offset < 0
-        echo 'Reached most recent item'
-        return
-    endif
-
     let history = yoink#getYankHistory()
 
-    if s:offsetSum + offset >= len(history)
-        echo 'Reached oldest item'
-        return
+    if g:yoinkSwapClampAtEnds
+        if s:offsetSum + offset < 0
+            echo 'Reached most recent item'
+            return
+        endif
+
+        if s:offsetSum + offset >= len(history)
+            echo 'Reached oldest item'
+            return
+        endif
     endif
 
     call yoink#rotate(offset)
@@ -281,7 +284,8 @@ function! yoink#rotate(offset)
         return
     endif
 
-    let offsetLeft = a:offset
+    " Mod to save ourselves some work
+    let offsetLeft = float2nr(fmod(a:offset, len(history)))
 
     while offsetLeft != 0
         if offsetLeft > 0

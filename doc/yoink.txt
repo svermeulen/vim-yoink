@@ -64,6 +64,7 @@ You can optionally override the default behaviour with the following settings:
 - *g:yoinkSyncSystemClipboardOnFocus* - When set to 0, the System Clipboard feature described below will be disabled.  Default: 1
 - *g:yoinkAutoFormatPaste* - When set to 1, after a paste occurs it will automatically be formatted (using |=| key).  Default: 0.  Note that you can also leave this off and use the toggle key instead for cases where you want to format after the paste.
 - *g:yoinkMoveCursorToEndOfPaste* - When set to 1, the cursor will always be placed at the end of the paste.  Default is 0 which will match normal Vim behaviour and place the cursor at the beginning when pasting multiline yanks.  Setting to 1 can be nicer because it makes the post-paste cursor position more consistent between multiline and non-multiline pastes (that is, the cursor will be at the end in both cases).  And also causes consecutive multiline pastes to be ordered correctly instead of interleaved together.
+- *g:yoinkSwapClampAtEnds* - When set to '1', when we reach the beginning or end of the yank history, the swap will stop there.  When set to '0', it will cycle back to the other end of the history so you can swap in the same direction forever. Default: '1'
 
 PERSISTENT HISTORY					*yoink-persistent-history*
 
