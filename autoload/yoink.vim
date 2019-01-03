@@ -17,6 +17,7 @@ let s:lastSwapChangedtick = -1
 let s:isSwapping = 0
 let s:offsetSum = 0
 
+let s:historyChangedCallbacks = []
 let s:yankStartCursorPos = []
 let s:yankStartWinView = {}
 
@@ -233,6 +234,10 @@ function! yoink#startUndoRepeatSwap()
     let s:lastSwapStartChangedtick = b:changedtick
 endfunction
 
+function! yoink#observeHistoryChangeEvent(callback)
+    call add(s:historyChangedCallbacks, a:callback)
+endfunction
+
 function! yoink#onHistoryChanged()
     if g:yoinkSyncNumberedRegisters
         let history = yoink#getYankHistory()
@@ -243,6 +248,10 @@ function! yoink#onHistoryChanged()
             call setreg(i, entry.text, entry.type)
         endfor
     endif
+
+    for Callback in s:historyChangedCallbacks
+        call Callback()
+    endfor
 endfunction
 
 function! yoink#tryAddToHistory(entry)
