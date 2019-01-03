@@ -355,11 +355,14 @@ endfunction
 
 function! yoink#showYank(yank, index)
     let index = printf("%-4d", a:index)
-    let line = substitute(a:yank.text, '\V\n', '^M', 'g')
+
+    let line = a:yank.text
 
     if len(line) > g:yoinkShowYanksWidth
         let line = line[: g:yoinkShowYanksWidth] . '…'
     endif
+
+    let line = substitute(line, '\V\n', '^M', 'g')
 
     echohl Directory | echo  index
     echohl None      | echon line
