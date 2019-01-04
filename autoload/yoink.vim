@@ -181,6 +181,7 @@ function! s:tryStartSwap()
         " set to false
         " Otherwise they will lose it completely since we clobber the default register to make
         " swapping work
+        " So probably better to preserve it even though adding it to history violates yoinkIncludeDeleteOperations
         call yoink#addCurrentDefaultRegToHistory()
 
         let s:isSwapping = 1
@@ -232,8 +233,7 @@ function! yoink#postPasteSwap(offset)
         endif
     endif
 
-    call yoink#rotate(offset)
-    let s:offsetSum += offset
+    let s:offsetSum += yoink#rotate(offset)
 
     call s:performSwap()
 endfunction
@@ -251,9 +251,10 @@ function! s:onHistoryChanged()
     if g:yoinkSyncNumberedRegisters
         let history = yoink#getYankHistory()
 
-        " sync numbered registers
-        for i in range(1, min([len(history), 9]))
-            let entry = history[i-1]
+        " We skip the first one because it's assumed that's set to the default register
+        " already (or failing that, the '0' register)
+        for i in range(1, min([len(history) - 1, 9]))
+            let entry = history[i]
             call setreg(i, entry.text, entry.type)
         endfor
     endif
@@ -297,11 +298,12 @@ function! s:addToHistory(entry, ...)
     return 0
 endfunction
 
+" Returns the amount rotated
 function! yoink#rotate(offset)
     let history = yoink#getYankHistory()
 
     if empty(history) || a:offset == 0
-        return
+        return 0
     endif
 
     " If the default register has contents different than the first entry in our history,
@@ -310,11 +312,12 @@ function! yoink#rotate(offset)
     if history[0] != yoink#getDefaultYankInfo()
         call yoink#setDefaultYankInfo(history[0])
         call s:onHistoryChanged()
-        return
+        return 0
     endif
 
+    let actualOffset = float2nr(fmod(a:offset, len(history)))
     " Mod to save ourselves some work
-    let offsetLeft = float2nr(fmod(a:offset, len(history)))
+    let offsetLeft = actualOffset
 
     while offsetLeft != 0
         if offsetLeft > 0
@@ -330,6 +333,7 @@ function! yoink#rotate(offset)
 
     call yoink#setDefaultYankInfo(history[0])
     call s:onHistoryChanged()
+    return actualOffset
 endfunction
 
 function! yoink#addCurrentDefaultRegToHistory()
