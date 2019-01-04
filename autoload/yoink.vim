@@ -16,6 +16,7 @@ let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:isSwapping = 0
 let s:offsetSum = 0
+let s:focusLostInfo = {}
 
 let s:historyChangedCallbacks = []
 let s:yankStartCursorPos = []
@@ -174,6 +175,14 @@ function! s:tryStartSwap()
     endif
 
     if !s:isSwapping
+        " This is necessary in the case where the default register is different from the first
+        " element in the history, which can happen a lot with deletes
+        " In this case add it to the history even though they might have yoinkIncludeDeleteOperations
+        " set to false
+        " Otherwise they will lose it completely since we clobber the default register to make
+        " swapping work
+        call yoink#addCurrentDefaultRegToHistory()
+
         let s:isSwapping = 1
         let s:offsetSum = 0
     endif
@@ -324,7 +333,12 @@ function! yoink#rotate(offset)
 endfunction
 
 function! yoink#addCurrentDefaultRegToHistory()
-    call s:addToHistory(yoink#getDefaultYankInfo())
+    let history = yoink#getYankHistory()
+    let entry = yoink#getDefaultYankInfo()
+
+    if len(history) == 0 || history[0] != entry
+        call s:addToHistory(entry)
+    endif
 endfunction
 
 function! yoink#clearYanks()
@@ -412,6 +426,9 @@ function! yoink#onFocusLost()
 endfunction
 
 function! yoink#onFocusGained()
+    if len(s:focusLostInfo) == 0
+        return
+    endif
 
     let defaultReg = yoink#getDefaultReg()
 
