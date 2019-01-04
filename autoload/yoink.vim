@@ -126,8 +126,21 @@ endfunction
 
 function! yoink#paste(...)
     let l:count = v:count > 0 ? v:count : 1
+    let previousPosition = getpos('.')
     exec "normal! \"" . s:currentPasteRegister . l:count . s:currentPasteType
+
     call yoink#adjustLastChangeIfNecessary()
+
+    if g:yoinkMoveCursorToEndOfPaste
+        let newPosition = getpos('.')
+        if abs(newPosition[1] - previousPosition[1]) > 1
+            " Only add to the jump list if the paste moved the cursor more than 1 line
+            call setpos('.', previousPosition)
+            normal! m`
+            call setpos('.', newPosition)
+        endif
+    endif
+
     call yoink#startUndoRepeatSwap()
 endfunction
 
