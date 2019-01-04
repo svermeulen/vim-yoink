@@ -4,11 +4,11 @@ scriptencoding utf-8
 let g:yoinkMaxItems = get(g:, 'yoinkMaxItems', 10)
 let g:yoinkShowYanksWidth = get(g:, 'yoinkShowYanksWidth', 80)
 let g:yoinkIncludeDeleteOperations = get(g:, 'yoinkIncludeDeleteOperations', 0)
-let g:yoinkSyncSystemClipboardOnFocus = get(g:, 'yoinkSyncSystemClipboardOnFocus', 1)
 let g:yoinkAutoFormatPaste = get(g:, 'yoinkAutoFormatPaste', 0)
 let g:yoinkMoveCursorToEndOfPaste = get(g:, 'yoinkMoveCursorToEndOfPaste', 0)
 let g:yoinkSyncNumberedRegisters = get(g:, 'yoinkSyncNumberedRegisters', 0)
 let g:yoinkSwapClampAtEnds = get(g:, 'yoinkSwapClampAtEnds', 1)
+let g:yoinkIncludeNamedRegisters = get(g:, 'yoinkIncludeNamedRegisters', 1)
 
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
@@ -156,14 +156,14 @@ function! s:postSwapCursorMove1()
 endfunction
 
 function! yoink#postPasteToggleFormat()
-    if yoink#tryStartSwap()
+    if s:tryStartSwap()
         let s:autoFormat = !s:autoFormat
         echo "Turned " . (s:autoFormat ? "on" : "off") . " formatting"
-        call yoink#performSwap()
+        call s:performSwap()
     endif
 endfunction
 
-function! yoink#tryStartSwap()
+function! s:tryStartSwap()
     " If a change occurred that was not a paste or a swap, we do not want to do the undo-redo
     " Also, if the swap has ended by executing a cursor move, then we don't want to
     " restart the swap again from the beginning because they would expect to still be at the
@@ -181,7 +181,7 @@ function! yoink#tryStartSwap()
     return 1
 endfunction
 
-function! yoink#performSwap()
+function! s:performSwap()
     " Stop checking to end the swap session
     augroup YoinkSwapPasteMoveDetect
         autocmd!
@@ -202,7 +202,7 @@ endfunction
 
 function! yoink#postPasteSwap(offset)
 
-    if !yoink#tryStartSwap()
+    if !s:tryStartSwap()
         return
     endif
 
@@ -226,7 +226,7 @@ function! yoink#postPasteSwap(offset)
     call yoink#rotate(offset)
     let s:offsetSum += offset
 
-    call yoink#performSwap()
+    call s:performSwap()
 endfunction
 
 " Note that this gets executed for every swap in addition to the initial paste
@@ -238,7 +238,7 @@ function! yoink#observeHistoryChangeEvent(callback)
     call add(s:historyChangedCallbacks, a:callback)
 endfunction
 
-function! yoink#onHistoryChanged()
+function! s:onHistoryChanged()
     if g:yoinkSyncNumberedRegisters
         let history = yoink#getYankHistory()
 
@@ -254,23 +254,34 @@ function! yoink#onHistoryChanged()
     endfor
 endfunction
 
-function! yoink#tryAddToHistory(entry)
+function! yoink#addTextToHistory(text, ...)
+    let regType = a:0 ? a:1 : 'v'
+    let entry = { 'text': a:text, 'type': regType }
+    " Add as second element to keep the default register at the beginning
+    call s:addToHistory(entry, 1)
+endfunction
+
+function! s:addToHistory(entry, ...)
+    let offset = a:0 ? a:1 : 0
     let history = yoink#getYankHistory()
 
     if !empty(a:entry.text) && (empty(history) || (a:entry != history[0]))
-        " If it's already in history then just move it to the front to avoid duplicates
+        " Remove it if it is already added somewhere in the history
         for i in range(len(history))
             if history[i] ==# a:entry
+                if i <= offset
+                    return
+                endif
                 call remove(history, i)
                 break
             endif
         endfor
 
-        call insert(history, a:entry)
+        call insert(history, a:entry, offset)
         if len(history) > g:yoinkMaxItems
             call remove(history, g:yoinkMaxItems, -1)
         endif
-        call yoink#onHistoryChanged()
+        call s:onHistoryChanged()
         return 1
     endif
 
@@ -289,7 +300,7 @@ function! yoink#rotate(offset)
     " In this case, don't rotate and instead just update the default register
     if history[0] != yoink#getDefaultYankInfo()
         call yoink#setDefaultYankInfo(history[0])
-        call yoink#onHistoryChanged()
+        call s:onHistoryChanged()
         return
     endif
 
@@ -309,18 +320,18 @@ function! yoink#rotate(offset)
     endwhile
 
     call yoink#setDefaultYankInfo(history[0])
-    call yoink#onHistoryChanged()
+    call s:onHistoryChanged()
 endfunction
 
-function! yoink#addCurrentToHistory()
-    call yoink#tryAddToHistory(yoink#getDefaultYankInfo())
+function! yoink#addCurrentDefaultRegToHistory()
+    call s:addToHistory(yoink#getDefaultYankInfo())
 endfunction
 
 function! yoink#clearYanks()
     let history = yoink#getYankHistory()
     let previousSize = len(history)
     call remove(history, 0, -1)
-    call yoink#addCurrentToHistory()
+    call yoink#addCurrentDefaultRegToHistory()
     echo "Cleared yank history of " . previousSize . " entries"
 endfunction
 
@@ -348,12 +359,12 @@ function! yoink#showYanks()
     echohl WarningMsg | echo "--- Yanks ---" | echohl None
     let i = 0
     for yank in yoink#getYankHistory()
-        call yoink#showYank(yank, i)
+        call s:showYank(yank, i)
         let i += 1
     endfor
 endfunction
 
-function! yoink#showYank(yank, index)
+function! s:showYank(yank, index)
     let index = printf("%-4d", a:index)
 
     let line = a:yank.text
@@ -384,23 +395,32 @@ function! yoink#rotateThenPrint(offset)
     endif
 endfunction
 
-function! yoink#onFocusGained()
-    if !g:yoinkSyncSystemClipboardOnFocus
-        return
+function! yoink#onVimEnter()
+    call yoink#addCurrentDefaultRegToHistory()
+
+    if get(g:, 'yoinkSyncSystemClipboardOnFocus', 1)
+        augroup _YoinkSystemSync
+            au!
+            autocmd FocusGained * call yoink#onFocusGained()
+            autocmd FocusLost * call yoink#onFocusLost()
+        augroup END
     endif
+endfunction
 
-    let history = yoink#getYankHistory()
+function! yoink#onFocusLost()
+    let s:focusLostInfo = yoink#getDefaultYankInfo()
+endfunction
 
-    " If we are using the system register as the default register
-    " and the user leaves vim, copies something, then returns,
-    " we want to add this data to the yank history
+function! yoink#onFocusGained()
+
     let defaultReg = yoink#getDefaultReg()
-    if defaultReg ==# '*' || defaultReg == '+'
-        let currentInfo = yoink#getDefaultYankInfo()
 
-        if len(history) == 0 || history[0] != currentInfo
-            " User copied something externally
-            call yoink#tryAddToHistory(currentInfo)
+    if defaultReg ==# '*' || defaultReg == '+'
+        let entry = yoink#getDefaultYankInfo()
+
+        if s:focusLostInfo != entry
+            " User copied something outside of vim
+            call yoink#addCurrentDefaultRegToHistory()
         endif
     endif
 endfunction
@@ -409,18 +429,26 @@ endfunction
 function! yoink#manualYank(text, ...) abort
     let regType = a:0 ? a:1 : 'v'
     let entry = { 'text': a:text, 'type': regType }
-    call yoink#tryAddToHistory(entry)
+    call s:addToHistory(entry)
     call yoink#setDefaultYankInfo(entry)
 endfunction
 
 function! yoink#onYank(ev) abort
-    let isValidRegister = a:ev.regname == '' || a:ev.regname == yoink#getDefaultReg()
+    if (a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations)
 
-    if isValidRegister && (a:ev.operator == 'y' || g:yoinkIncludeDeleteOperations)
-        " Don't use a:ev.regcontents because it's a list of lines and not just the raw text 
-        " and the raw text is needed when comparing getDefaultYankInfo in a few places
-        " above
-        call yoink#tryAddToHistory({ 'text': getreg(a:ev.regname), 'type': a:ev.regtype })
+        let isDefaultRegister = a:ev.regname == '' || a:ev.regname == yoink#getDefaultReg()
+
+        if isDefaultRegister || g:yoinkIncludeNamedRegisters
+
+            " We don't use a:ev.regcontents because it's a list of lines and not the raw text
+            " The raw text is needed when comparing getDefaultYankInfo in a few places
+            " above
+            let entry = { 'text': getreg(a:ev.regname), 'type': a:ev.regtype }
+
+            " We add an offset for named registers so that the default register is always at 
+            " index 0 in the yank history
+            call s:addToHistory(entry, isDefaultRegister ? 0 : 1)
+        endif
     end
 
     if (a:ev.operator == 'y' && len(s:yankStartCursorPos) > 0)

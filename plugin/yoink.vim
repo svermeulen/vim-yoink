@@ -23,8 +23,7 @@ endif
 augroup _Yoink
     au!
     autocmd TextYankPost * call yoink#onYank(copy(v:event))
-    autocmd VimEnter * call yoink#addCurrentToHistory()
-    autocmd FocusGained * call yoink#onFocusGained()
+    autocmd VimEnter * call yoink#onVimEnter()
 augroup END
 
 " <c-u> because count is handled internally to each of these

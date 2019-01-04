@@ -67,10 +67,11 @@ You can optionally override the default behaviour with the following settings:
 - `g:yoinkSyncNumberedRegisters` - When set to `1`, every time the yank history changes the numbered registers 1 - 9 will be updated to sync with the first 9 entries in the yank history.  See [here](http://vimcasts.org/blog/2013/11/registers-the-good-the-bad-and-the-ugly-parts/) for an explanation of why we would want do do this. Default: `0`.
 - `g:yoinkIncludeDeleteOperations` - When set to `1`, delete operations such as `x` or `d` or `s` will also be added to the yank history.  Default: `0`
 - `g:yoinkSavePersistently` - When set to `1`, the yank history will be saved persistently across sessions of Vim.  Note: Requires Neovim.  See <a href="#shada-support">here</a> for details. Default: `0`
-- `g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
 - `g:yoinkAutoFormatPaste` - When set to `1`, after a paste occurs it will automatically be formatted (using `=` key).  Default: `0`.  Note that you can also leave this off and use the toggle key instead for cases where you want to format after the paste.
 - `g:yoinkMoveCursorToEndOfPaste` - When set to `1`, the cursor will always be placed at the end of the paste.  Default is `0` which will match normal Vim behaviour and place the cursor at the beginning when pasting multiline yanks.  Setting to `1` can be nicer because it makes the post-paste cursor position more consistent between multiline and non-multiline pastes (that is, the cursor will be at the end in both cases).  And also causes consecutive multiline pastes to be ordered correctly instead of interleaved together.
 - `g:yoinkSwapClampAtEnds` - When set to `1`, when we reach the beginning or end of the yank history, the swap will stop there.  When set to `0`, it will cycle back to the other end of the history so you can swap in the same direction forever. Default: `1`
+- `g:yoinkIncludeNamedRegisters` - When set to `1`, all yanks for all registers will be included in the history.  When set to `0`, only changes to the default register will be recorded.  Default: `1`
+- `g:yoinkSyncSystemClipboardOnFocus` - When set to `0`, the System Clipboard feature described below will be disabled.  Default: `1`
 
 ## <a id="shada-support"></a>Persistent/Shared History
 
@@ -84,14 +85,23 @@ Note also that the `!` option must be added to Neovims `shada` setting for this 
 
 Another feature worth mentioning is that if you have `&clipboard` set to either `unnamed` or `unnamedplus` then Yoink will automatically record yanks that occur outside of Vim.  It does this by checking if the system clipboard was changed every time Vim gains focus and if so adding the new yank to the history.
 
-Note that if you don't like this behaviour you can disable it by setting `g:yoinkSyncSystemClipboardOnFocus` to `0`
+Note that you can disable it by setting `g:yoinkSyncSystemClipboardOnFocus` to `0` then restarting vim
 
 ## Integration with vim-cutlass
 
 If you also have [vim-cutlass](https://github.com/svermeulen/vim-cutlass) installed then I suggest you set `g:yoinkIncludeDeleteOperations` to 1.  Otherwise the 'cut' operator that you use will not be added to the yank history.
 
-## Other Notes
+## FAQ
 
-* Yoink will only add to the history when a yank occurs on the default register.  If you explicitly name a register for a yank it will not be recorded
-* If you want to add to the yank history from your own vimscript code, you can do this by calling `yoink#manualYank`
+* #### I want the yank history in the autocomplete list
+
+If you're using [ncm2](https://github.com/ncm2/ncm2) for autocomplete you can use [this](https://github.com/svermeulen/ncm2-yoink).  If you're using something else please create a github issue and we can look at adding a source for that
+
+* #### I want to rotate to a specific number in the :Yanks list.  How do I do this?
+
+Just pass a count to the `[y` command.  For example, to rotate to yank #12 as displayed in the `:Yanks` list, execute `12[y`
+
+* #### I want to add to the yank history manually from my own vimscript
+
+You can call `yoink#manualYank` for this.  Note that calling this will also set the contents of the default register with the given value.  If you just want to add to history without affecting the default register, you can call `yoink#addTextToHistory` instead
 
