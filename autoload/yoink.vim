@@ -29,7 +29,7 @@ let s:isCutlassInstalled = 0
 try
     call cutlass#getVersion()
     let s:isCutlassInstalled = 1
-catch /\VUnknown function/
+catch /\Vcutlass#getVersion/
 endtry
 
 if s:isCutlassInstalled && !g:yoinkIncludeDeleteOperations
