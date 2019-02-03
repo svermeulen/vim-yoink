@@ -22,6 +22,7 @@ let s:historyChangedCallbacks = []
 let s:yankStartCursorPos = []
 let s:yankStartWinView = {}
 
+let s:cnt = 1
 let s:currentPasteType = ''
 let s:currentPasteRegister = ''
 
@@ -92,9 +93,10 @@ function! yoink#getDefaultReg()
     endif
 endfunction
 
-function! yoink#setupPaste(pasteType, reg)
+function! yoink#setupPaste(pasteType, reg, cnt)
     let s:currentPasteType = a:pasteType
     let s:currentPasteRegister = a:reg
+    let s:cnt = a:cnt > 0 ? a:cnt : 1
 endfunction
 
 function! yoink#adjustLastChangeIfNecessary()
@@ -125,9 +127,8 @@ function! yoink#adjustLastChangeIfNecessary()
 endfunction
 
 function! yoink#paste(...)
-    let l:count = v:count > 0 ? v:count : 1
     let previousPosition = getpos('.')
-    exec "normal! \"" . s:currentPasteRegister . l:count . s:currentPasteType
+    exec "normal! \"" . s:currentPasteRegister . s:cnt . s:currentPasteType
 
     call yoink#adjustLastChangeIfNecessary()
 
