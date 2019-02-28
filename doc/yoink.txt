@@ -99,4 +99,11 @@ Just pass a count to the '[y' command.  For example, to rotate to yank #12 as di
 
 You can call 'yoink#manualYank' for this.  Note that calling this will also set the contents of the default register with the given value.  If you just want to add to history without affecting the default register, you can call 'yoink#addTextToHistory' instead
 
+- 'I want to use Yoink `<c-p>` mapping in conjunction with the default `ctrlp.vim` mapping'
+
+Just use the following mappings:
+
+    let g:ctrlp_map=''
+    nmap <expr> <c-p> yoink#isSwapping() ? '<plug>(YoinkPostPasteSwapForward)' : '<Plug>(ctrlp)'
+
  vim:tw=78:ts=8:ft=help:norl:
