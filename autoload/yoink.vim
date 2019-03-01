@@ -387,6 +387,10 @@ function! yoink#getYankInfoForReg(reg)
     return { 'text': getreg(a:reg), 'type': getregtype(a:reg) }
 endfunction
 
+function! yoink#isSwapping()
+    return s:isSwapping
+endfunction
+
 function! yoink#showYanks()
     echohl WarningMsg | echo "--- Yanks ---" | echohl None
     let i = 0
