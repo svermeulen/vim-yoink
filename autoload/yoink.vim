@@ -97,6 +97,10 @@ function! yoink#setupPaste(pasteType, reg, cnt)
     let s:currentPasteType = a:pasteType
     let s:currentPasteRegister = a:reg
     let s:cnt = a:cnt > 0 ? a:cnt : 1
+
+    if a:reg == "_"
+        let s:currentPasteRegister = yoink#getDefaultReg()
+    endif
 endfunction
 
 function! yoink#adjustLastChangeIfNecessary()
