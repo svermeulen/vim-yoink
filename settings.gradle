@@ -1,0 +1,15 @@
+pluginManagement {
+  repositories {
+    mavenLocal()
+    maven {
+      url aveMavenUrl
+      credentials {
+        username aveMavenUser
+        password aveMavenPassword
+      }
+    }
+    gradlePluginPortal()
+  }
+}
+
+rootProject.name = 'vim-yoink'

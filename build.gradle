@@ -1,0 +1,25 @@
+
+plugins {
+  id "maven-publish"
+  id "com.ave.versioning" version '0.3.17'
+  id "com.ave.vimplugin" version '0.0.2'
+}
+
+group = "com.ave.vim.plugins"
+
+task clean(type:Delete) {
+  delete buildDir
+}
+
+publishing {
+  repositories {
+    maven {
+      url aveMavenUrl
+      credentials {
+        username aveMavenUser
+        password aveMavenPassword
+      }
+    }
+  }
+}
+
