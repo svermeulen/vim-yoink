@@ -13,3 +13,12 @@ pluginManagement {
 }
 
 rootProject.name = 'vim-yoink'
+
+def includeBuildsFile = file("includedBuilds.txt")
+
+if (includeBuildsFile.exists()) {
+  for (def line : includeBuildsFile.readLines()) {
+    includeBuild line
+  }
+}
+
