@@ -1,23 +1,48 @@
 
-plugins {
-  id "maven-publish"
-  id "ave-versioning" version '0.4.3'
-  id "com.ave.vimplugin" version '1.1.0-alpha.2'
+buildscript {
+  configurations.classpath.resolutionStrategy.activateDependencyLocking()
+
+  repositories {
+    gradlePluginPortal()
+    mavenLocal()
+    maven {
+      name "svkj"
+      url svkjMavenUrl
+      credentials {
+        username svkjMavenUser
+        password svkjMavenPassword
+      }
+    }
+  }
+
+  dependencies {
+    classpath property("deps.svkj-gradle-standard")
+    classpath property("deps.svkj-gradle-vim-plugin")
+  }
 }
 
-group = "com.ave.vim.plugins"
+plugins {
+  id "maven-publish"
+}
 
-task clean(type:Delete) {
-  delete buildDir
+apply plugin: "svkj-gradle-standard"
+apply plugin: "svkj-gradle-vim-plugin"
+
+group = "com.svkj.vim.plugins"
+
+gradleValidation {
+  suppressedErrors = ["E858", "E138"]
 }
 
 publishing {
   repositories {
+    mavenLocal()
     maven {
-      url aveMavenUrl
+      name "svkj"
+      url svkjMavenUrl
       credentials {
-        username aveMavenUser
-        password aveMavenPassword
+        username svkjMavenUser
+        password svkjMavenPassword
       }
     }
   }

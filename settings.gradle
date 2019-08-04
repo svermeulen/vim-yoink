@@ -1,16 +1,3 @@
-pluginManagement {
-  repositories {
-    mavenLocal()
-    maven {
-      url aveMavenUrl
-      credentials {
-        username aveMavenUser
-        password aveMavenPassword
-      }
-    }
-    gradlePluginPortal()
-  }
-}
 
 rootProject.name = 'vim-yoink'
 
@@ -18,7 +5,9 @@ def includeBuildsFile = file("includedBuilds.txt")
 
 if (includeBuildsFile.exists()) {
   for (def line : includeBuildsFile.readLines()) {
-    includeBuild line
+    if (!line.startsWith('#') && line.trim().size() > 0) {
+      includeBuild line
+    }
   }
 }
 
