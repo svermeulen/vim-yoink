@@ -9,6 +9,7 @@ let g:yoinkMoveCursorToEndOfPaste = get(g:, 'yoinkMoveCursorToEndOfPaste', 0)
 let g:yoinkSyncNumberedRegisters = get(g:, 'yoinkSyncNumberedRegisters', 0)
 let g:yoinkSwapClampAtEnds = get(g:, 'yoinkSwapClampAtEnds', 1)
 let g:yoinkIncludeNamedRegisters = get(g:, 'yoinkIncludeNamedRegisters', 1)
+let g:yoinkChangeTickThreshold = get(g:, 'yoinkChangeTickThreshold', 0)
 
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
@@ -182,12 +183,16 @@ function! yoink#postPasteToggleFormat()
     endif
 endfunction
 
+function s:isCloseEnoughChangeTick(tick)
+    return abs(b:changedtick - a:tick) <= g:yoinkChangeTickThreshold 
+endfunction
+
 function! s:tryStartSwap()
     " If a change occurred that was not a paste or a swap, we do not want to do the undo-redo
     " Also, if the swap has ended by executing a cursor move, then we don't want to
     " restart the swap again from the beginning because they would expect to still be at the
     " previous offset
-    if b:changedtick != s:lastSwapStartChangedtick || (!s:isSwapping && b:changedtick == s:lastSwapChangedtick)
+    if !s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) || (!s:isSwapping && s:isCloseEnoughChangeTick(s:lastSwapChangedtick))
         echo 'Last action was not paste - swap ignored'
         return 0
     endif
