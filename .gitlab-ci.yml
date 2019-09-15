@@ -1,0 +1,4 @@
+image: sfvermeulen/ci:javagit
+
+validateGradle:
+  script: ./gradlew validateGradle -i -s

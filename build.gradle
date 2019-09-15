@@ -31,7 +31,7 @@ apply plugin: "svkj-gradle-vim-plugin"
 group = "com.svkj.vim.plugins"
 
 gradleValidation {
-  suppressedErrors = ["E858", "E138"]
+  suppressedErrors = ["E138"]
 }
 
 publishing {
