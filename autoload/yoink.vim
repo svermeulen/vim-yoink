@@ -192,7 +192,7 @@ function! s:tryStartSwap()
     " Also, if the swap has ended by executing a cursor move, then we don't want to
     " restart the swap again from the beginning because they would expect to still be at the
     " previous offset
-    if !s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) || (!s:isSwapping && s:isCloseEnoughChangeTick(s:lastSwapChangedtick))
+    if !yoink#canSwap()
         echo 'Last action was not paste - swap ignored'
         return 0
     endif
@@ -394,6 +394,10 @@ endfunction
 
 function! yoink#getYankInfoForReg(reg)
     return { 'text': getreg(a:reg), 'type': getregtype(a:reg) }
+endfunction
+
+function! yoink#canSwap()
+    return !(!s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) || (!s:isSwapping && s:isCloseEnoughChangeTick(s:lastSwapChangedtick)))
 endfunction
 
 function! yoink#isSwapping()
