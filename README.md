@@ -111,6 +111,15 @@ Just use the following mappings:
 
 ```viml
 let g:ctrlp_map=''
-nmap <expr> <c-p> yoink#isSwapping() ? '<plug>(YoinkPostPasteSwapForward)' : '<Plug>(ctrlp)'
+nmap <expr> <c-p> yoink#canSwap() ? '<plug>(YoinkPostPasteSwapForward)' : '<Plug>(ctrlp)'
+```
+
+* #### I want to use the same binding for paste to trigger the swap afterwards
+
+Try adding this to your `.vimrc`:
+
+```
+nmap <expr> p yoink#canSwap() ? '<plug>(YoinkPostPasteSwapBack)' : '<plug>(YoinkPaste_p)'
+nmap <expr> P yoink#canSwap() ? '<plug>(YoinkPostPasteSwapForward)' : '<plug>(YoinkPaste_P)'
 ```
 
