@@ -147,14 +147,7 @@ function! yoink#paste(...)
         endif
     endif
 
-    let s:lastPasteChangedtick = b:changedtick
-
-    let s:hasMovedFromPaste = 0
-    " We want to disable the ability to swap if the cursor moves after this point
-    augroup YoinkYankPostPasteMove
-        autocmd!
-        autocmd CursorMoved <buffer> call <sid>postPasteMove1()
-    augroup END
+    call yoink#startUndoRepeatSwap()
 endfunction
 
 function! yoink#postPasteToggleFormat()
@@ -248,6 +241,18 @@ function! s:postPasteMove1()
     augroup YoinkYankPostPasteMove
         autocmd!
         autocmd CursorMoved <buffer> call <sid>postPasteMove2()
+    augroup END
+endfunction
+
+" Note that this gets executed for every swap in addition to the initial paste
+function! yoink#startUndoRepeatSwap()
+    let s:lastPasteChangedtick = b:changedtick
+
+    let s:hasMovedFromPaste = 0
+    " We want to disable the ability to swap if the cursor moves after this point
+    augroup YoinkYankPostPasteMove
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>postPasteMove1()
     augroup END
 endfunction
 
