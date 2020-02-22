@@ -310,7 +310,7 @@ function! s:addToHistory(entry, ...)
             endif
         endfor
 
-        call insert(history, a:entry, offset)
+        call insert(history, a:entry, max([offset, len(history)]))
         if len(history) > g:yoinkMaxItems
             call remove(history, g:yoinkMaxItems, -1)
         endif
