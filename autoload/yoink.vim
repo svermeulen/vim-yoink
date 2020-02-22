@@ -397,7 +397,7 @@ function! yoink#getYankInfoForReg(reg)
 endfunction
 
 function! yoink#canSwap()
-    return !(!s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) || (!s:isSwapping && s:isCloseEnoughChangeTick(s:lastSwapChangedtick)))
+    return s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) && (s:isSwapping || !s:isCloseEnoughChangeTick(s:lastSwapChangedtick))
 endfunction
 
 function! yoink#isSwapping()
