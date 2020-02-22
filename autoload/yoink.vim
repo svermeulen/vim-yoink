@@ -16,6 +16,7 @@ let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
 let s:lastSwapStartChangedtick = -1
 let s:lastSwapChangedtick = -1
 let s:isSwapping = 0
+let s:canStartSwap = 0
 let s:offsetSum = 0
 let s:focusLostInfo = {}
 
@@ -157,6 +158,7 @@ function! s:postSwapCursorMove2()
     endif
 
     let s:isSwapping = 0
+    let s:canStartSwap = 0
     let s:autoFormat = g:yoinkAutoFormatPaste
 
     augroup YoinkSwapPasteMoveDetect
@@ -261,9 +263,38 @@ function! yoink#postPasteSwap(offset)
     call s:performSwap()
 endfunction
 
+function! s:postInitialPasteMove2()
+    augroup YoinkYankInitialPasteMove
+        autocmd!
+    augroup END
+
+    if !s:isSwapping
+        let s:canStartSwap = 0
+    endif
+endfunction
+
+function! s:postInitialPasteMove1()
+    augroup YoinkYankInitialPasteMove
+        autocmd!
+        if !s:isSwapping
+            autocmd CursorMoved <buffer> call <sid>postInitialPasteMove2()
+        endif
+    augroup END
+endfunction
+
 " Note that this gets executed for every swap in addition to the initial paste
 function! yoink#startUndoRepeatSwap()
     let s:lastSwapStartChangedtick = b:changedtick
+
+    if !s:isSwapping
+        " If s:isSwapping is false then this is for the initial paste
+        " We want to disable the ability to swap if the cursor moves after this point
+        let s:canStartSwap = 1
+        augroup YoinkYankInitialPasteMove
+            autocmd!
+            autocmd CursorMoved <buffer> call <sid>postInitialPasteMove1()
+        augroup END
+    endif
 endfunction
 
 function! yoink#observeHistoryChangeEvent(callback)
@@ -397,7 +428,11 @@ function! yoink#getYankInfoForReg(reg)
 endfunction
 
 function! yoink#canSwap()
-    return s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick) && (s:isSwapping || !s:isCloseEnoughChangeTick(s:lastSwapChangedtick))
+    if !s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick)
+        return 0
+    endif
+    
+    return s:isSwapping || s:canStartSwap
 endfunction
 
 function! yoink#isSwapping()
@@ -512,6 +547,10 @@ endfunction
 
 " For when re-sourcing this file after a paste
 augroup YoinkSwapPasteMoveDetect
+    autocmd!
+augroup END
+
+augroup YoinkYankInitialPasteMove
     autocmd!
 augroup END
 
