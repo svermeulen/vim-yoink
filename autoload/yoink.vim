@@ -13,10 +13,9 @@ let g:yoinkChangeTickThreshold = get(g:, 'yoinkChangeTickThreshold', 0)
 
 let s:saveHistoryToShada = get(g:, 'yoinkSavePersistently', 0)
 let s:autoFormat = get(g:, 'yoinkAutoFormatPaste', 0)
-let s:lastSwapStartChangedtick = -1
-let s:lastSwapChangedtick = -1
+let s:lastPasteChangedtick = -1
 let s:isSwapping = 0
-let s:canStartSwap = 0
+let s:hasMovedFromPaste = 0
 let s:offsetSum = 0
 let s:focusLostInfo = {}
 
@@ -151,32 +150,6 @@ function! yoink#paste(...)
     call yoink#startUndoRepeatSwap()
 endfunction
 
-function! s:postSwapCursorMove2()
-    if !s:isSwapping
-        " Should never happen
-        throw 'Unknown Error detected during yoink paste'
-    endif
-
-    let s:isSwapping = 0
-    let s:canStartSwap = 0
-    let s:autoFormat = g:yoinkAutoFormatPaste
-
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-    augroup END
-
-    " Return yank positions to their original state before we started swapping
-    call yoink#rotate(-s:offsetSum)
-endfunction
-
-function! s:postSwapCursorMove1()
-    " Wait for the next cursor move because this gets called immediately after yoink#postPasteSwap
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove2()
-    augroup END
-endfunction
-
 function! yoink#postPasteToggleFormat()
     if s:tryStartSwap()
         let s:autoFormat = !s:autoFormat
@@ -217,22 +190,7 @@ function! s:tryStartSwap()
 endfunction
 
 function! s:performSwap()
-    " Stop checking to end the swap session
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-    augroup END
-
     normal! u.
-
-    let s:lastSwapChangedtick = b:changedtick
-
-    " Wait until the cursor moves and then end the swap
-    " We do this so that if they move somewhere else and then paste they would expect the most
-    " recent yank and not the yank at the offset where they finished the previous swap
-    augroup YoinkSwapPasteMoveDetect
-        autocmd!
-        autocmd CursorMoved <buffer> call <sid>postSwapCursorMove1()
-    augroup END
 endfunction
 
 function! yoink#postPasteSwap(offset)
@@ -263,38 +221,39 @@ function! yoink#postPasteSwap(offset)
     call s:performSwap()
 endfunction
 
-function! s:postInitialPasteMove2()
-    augroup YoinkYankInitialPasteMove
+function! s:postPasteMove2()
+    augroup YoinkYankPostPasteMove
         autocmd!
     augroup END
 
-    if !s:isSwapping
-        let s:canStartSwap = 0
+    let s:hasMovedFromPaste = 1
+
+    if s:isSwapping
+        let s:isSwapping = 0
+        let s:autoFormat = g:yoinkAutoFormatPaste
+
+        " Return yank positions to their original state before we started swapping
+        call yoink#rotate(-s:offsetSum)
     endif
 endfunction
 
-function! s:postInitialPasteMove1()
-    augroup YoinkYankInitialPasteMove
+function! s:postPasteMove1()
+    augroup YoinkYankPostPasteMove
         autocmd!
-        if !s:isSwapping
-            autocmd CursorMoved <buffer> call <sid>postInitialPasteMove2()
-        endif
+        autocmd CursorMoved <buffer> call <sid>postPasteMove2()
     augroup END
 endfunction
 
 " Note that this gets executed for every swap in addition to the initial paste
 function! yoink#startUndoRepeatSwap()
-    let s:lastSwapStartChangedtick = b:changedtick
+    let s:lastPasteChangedtick = b:changedtick
 
-    if !s:isSwapping
-        " If s:isSwapping is false then this is for the initial paste
-        " We want to disable the ability to swap if the cursor moves after this point
-        let s:canStartSwap = 1
-        augroup YoinkYankInitialPasteMove
-            autocmd!
-            autocmd CursorMoved <buffer> call <sid>postInitialPasteMove1()
-        augroup END
-    endif
+    let s:hasMovedFromPaste = 0
+    " We want to disable the ability to swap if the cursor moves after this point
+    augroup YoinkYankPostPasteMove
+        autocmd!
+        autocmd CursorMoved <buffer> call <sid>postPasteMove1()
+    augroup END
 endfunction
 
 function! yoink#observeHistoryChangeEvent(callback)
@@ -428,11 +387,7 @@ function! yoink#getYankInfoForReg(reg)
 endfunction
 
 function! yoink#canSwap()
-    if !s:isCloseEnoughChangeTick(s:lastSwapStartChangedtick)
-        return 0
-    endif
-    
-    return s:isSwapping || s:canStartSwap
+    return s:isCloseEnoughChangeTick(s:lastPasteChangedtick) && !s:hasMovedFromPaste
 endfunction
 
 function! yoink#isSwapping()
@@ -546,11 +501,7 @@ function! yoink#onYank(ev) abort
 endfunction
 
 " For when re-sourcing this file after a paste
-augroup YoinkSwapPasteMoveDetect
-    autocmd!
-augroup END
-
-augroup YoinkYankInitialPasteMove
+augroup YoinkYankPostPasteMove
     autocmd!
 augroup END
 
