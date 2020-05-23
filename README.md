@@ -7,7 +7,7 @@ Yoink will automatically maintain a history of yanks that you can choose between
 
 It provides very similar functionality to [nvim-miniyank](https://github.com/bfredl/nvim-miniyank), [YankRing.vim](https://github.com/vim-scripts/YankRing.vim), [vim-yankstack](https://github.com/maxbrunsfeld/vim-yankstack) or the yank features in [vim-easyclip](https://github.com/svermeulen/vim-easyclip).
 
-Also see [here](https://www.youtube.com/watch?v=uKVLpZH79IQ&t=491s) if you prefer watching a video explanation of this plugin instead of the below text.
+Also see [here](https://www.youtube.com/watch?v=uKVLpZH79IQ) if you prefer watching a video explanation of this plugin instead of the below text.
 
 ## Mappings
 
