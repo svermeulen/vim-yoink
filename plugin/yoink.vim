@@ -34,6 +34,7 @@ nnoremap <silent> <plug>(YoinkPostPasteSwapForward) :<c-u>call yoink#postPasteSw
 nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :<c-u>call yoink#postPasteSwap(1)<cr>
 
 " We use opfunc here to make it work correctly with repeat `.` operation
+" Note that we use execute() to ensure it all runs in one command so it's compatible with using <c-o> from insert mode
 nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>execute('call yoink#setupPaste("p", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
 nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>execute('call yoink#setupPaste("P", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
 
