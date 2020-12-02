@@ -460,12 +460,12 @@ function! yoink#onFocusGained()
     if defaultReg ==# '*' || defaultReg == '+'
         let entry = yoink#getDefaultYankInfo()
 
-        " manually sync clipboard register with wayland clipboard via wl-paste
-        if g:yoinkUseWlClipboard && executable("wl-paste")
-            let wlEntry = system("wl-paste --no-newline")
-            if entry.text != wlEntry
-                call setreg(yoink#getDefaultReg(), wlEntry, 'v')
-                let entry = { 'text': wlEntry, 'type': 'v' }
+        " manually sync clipboard register with system clipboard via configured paste cmd
+        if exists("g:yoinkSystemPasteCmd")
+            let systemEntry = system(g:yoinkSystemPasteCmd, entry.text)
+            if entry.text != systemEntry
+                call setreg(yoink#getDefaultReg(), systemEntry, 'v')
+                let entry = { 'text': systemEntry, 'type': 'v' }
             endif
         endif
 
@@ -499,9 +499,9 @@ function! yoink#onYank(ev) abort
             " We add an offset for named registers so that the default register is always at 
             " index 0 in the yank history
             call s:addToHistory(entry, isDefaultRegister ? 0 : 1)
-            " also set wayland system clipboard manually via wl-copy
-            if g:yoinkUseWlClipboard && executable("wl-copy")
-                call system("wl-copy --type text/plain", entry.text)
+            " additionally set system clipboard manually via configured yank cmd
+            if exists("g:yoinkSystemYankCmd")
+                call system(g:yoinkSystemYankCmd, entry.text)
             endif
         endif
     end
