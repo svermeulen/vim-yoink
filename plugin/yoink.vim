@@ -38,6 +38,9 @@ nnoremap <silent> <plug>(YoinkPostPasteSwapBack) :<c-u>call yoink#postPasteSwap(
 nnoremap <silent> <plug>(YoinkPaste_p) :<c-u>execute('call yoink#setupPaste("p", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
 nnoremap <silent> <plug>(YoinkPaste_P) :<c-u>execute('call yoink#setupPaste("P", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
 
+nnoremap <silent> <plug>(YoinkPaste_gp) :<c-u>execute('call yoink#setupPaste("gp", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
+nnoremap <silent> <plug>(YoinkPaste_gP) :<c-u>execute('call yoink#setupPaste("gP", v:register, v:count) \| set opfunc=yoink#paste \| normal! g@l')<CR>
+
 nnoremap <silent> <plug>(YoinkPostPasteToggleFormat) :<c-u>call yoink#postPasteToggleFormat()<cr>
 
 nnoremap <silent> <expr> <plug>(YoinkYankPreserveCursorPosition) yoink#startYankPreserveCursorPosition()
