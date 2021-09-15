@@ -264,12 +264,19 @@ function! s:onHistoryChanged()
     if g:yoinkSyncNumberedRegisters
         let history = yoink#getYankHistory()
 
-        " We skip the first one because it's assumed that's set to the default register
-        " already (or failing that, the '0' register)
+        " For unknown reasons we need to temporarily store the default register
+        " contents, then restore this afterwards
+        " Since it seems that when we set register '1' this sometimes clobbers the default register
+        " as well
+        let oldDefaultYankInfo = yoink#getDefaultYankInfo()
+
+        " Start with 1 because 0 in history is already saved in default reg
         for i in range(1, min([len(history) - 1, 9]))
             let entry = history[i]
             call setreg(i, entry.text, entry.type)
         endfor
+
+        call yoink#setDefaultYankInfo(oldDefaultYankInfo)
     endif
 
     for Callback in s:historyChangedCallbacks
