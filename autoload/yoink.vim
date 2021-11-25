@@ -467,6 +467,15 @@ function! yoink#onFocusGained()
     if defaultReg ==# '*' || defaultReg == '+'
         let entry = yoink#getDefaultYankInfo()
 
+        " manually sync clipboard register with system clipboard via configured paste cmd
+        if exists("g:yoinkSystemPasteCmd")
+            let systemEntry = system(g:yoinkSystemPasteCmd, entry.text)
+            if entry.text != systemEntry
+                call setreg(yoink#getDefaultReg(), systemEntry, 'v')
+                let entry = { 'text': systemEntry, 'type': 'v' }
+            endif
+        endif
+
         if s:focusLostInfo != entry
             " User copied something outside of vim
             call yoink#addCurrentDefaultRegToHistory()
@@ -497,6 +506,10 @@ function! yoink#onYank(ev) abort
             " We add an offset for named registers so that the default register is always at 
             " index 0 in the yank history
             call s:addToHistory(entry, isDefaultRegister ? 0 : 1)
+            " additionally set system clipboard manually via configured yank cmd
+            if exists("g:yoinkSystemYankCmd")
+                call system(g:yoinkSystemYankCmd, entry.text)
+            endif
         endif
     end
 
